@@ -42,7 +42,9 @@
 
 
 object_tangible_ship_crafted_chassis_base_deed = object_tangible_ship_crafted_chassis_shared_base_deed:new {
-
+    gameObjectType = 8388617,
+    shipControlObject = "object/intangible/ship/base/ship_control_device_base.iff",
+    generatedObjectTemplate = "object/ship/player/ship_base.iff",
 }
 
 ObjectTemplates:addTemplate(object_tangible_ship_crafted_chassis_base_deed, "object/tangible/ship/crafted/chassis/base_deed.iff")

@@ -1821,6 +1821,11 @@ object_tangible_terminal_terminal_character_builder = object_tangible_terminal_s
 			"Deeds",
 			{
 				"Resource Deed", "object/tangible/veteran_reward/resource.iff",
+				"Ship Deeds",
+				{
+					"YT1300", "object/tangible/ship/crafted/chassis/yt1300_deed.iff",
+					"X-Wing", "object/tangible/ship/crafted/chassis/xwing_deed.iff",
+				},
 				"Vehicle Deeds",
 				{
 					"Swoop", "object/tangible/deed/vehicle_deed/speederbike_swoop_deed.iff",

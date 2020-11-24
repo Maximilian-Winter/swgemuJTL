@@ -7,6 +7,8 @@ package server.zone.managers.space;
 import server.zone.managers.planet.PlanetManager;
 import server.zone.ZoneProcessServer;
 import server.zone.Zone;
+include server.zone.managers.space.HyperspaceTravelPointList;
+include server.zone.managers.space.HyperspaceTravelPoint;
 include engine.log.Logger;
 
 @dirty
@@ -17,9 +19,24 @@ class SpaceManager extends PlanetManager {
 		Logger.setLoggingName("SpaceManager " + planet.getZoneName());
 		Logger.setLogging(false);
 		Logger.setGlobalLogging(true);
+
+		hyperspaceTravelPointList = new HyperspaceTravelPointList();
 	}
 
-	public void initialize() {
-		Logger.info("loading space manager " + super.zone.getZoneName());
+		/**
+	 * Gets the PlanetTravelPoint that corresponds to the point name. If the point doesn't exist
+	 * then it will return NULL.
+	 * @param pointName The planet travel point's name.
+	 * @return PlanetTravelPoint for the given point name.
+	 */
+	@local
+	public HyperspaceTravelPoint getHyperspaceTravelPoint(final string pointName) {
+		return hyperspaceTravelPointList.get(pointName);
 	}
+
+	public native void initialize();
+
+	private native void loadLuaConfig();
+
+	protected HyperspaceTravelPointList hyperspaceTravelPointList;
 }

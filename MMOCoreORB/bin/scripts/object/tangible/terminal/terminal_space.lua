@@ -42,7 +42,7 @@
 
 
 object_tangible_terminal_terminal_space = object_tangible_terminal_shared_terminal_space:new {
-
+    gameObjectType = 16395
 }
 
 ObjectTemplates:addTemplate(object_tangible_terminal_terminal_space, "object/tangible/terminal/terminal_space.iff")

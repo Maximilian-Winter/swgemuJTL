@@ -300,6 +300,8 @@ public:
 	const static int VETHARVESTERDEED = 0x800008;
 	// ************************
 
+	const static int SHIPDEED = 0x800009;
+
 	const static int CLOTHING = 0x1000000;
 	const static int BANDOLIER = 0x1000001;
 	const static int BELT = 0x1000002;

@@ -47,6 +47,7 @@ public:
 
 		JtlShipListResponse* resp = new JtlShipListResponse(player, invokedObject);
 		player->sendMessage(resp);
+		
 	}
 };
 

@@ -10,36 +10,45 @@
 
 #include "ObjectControllerMessage.h"
 #include "server/zone/objects/creature/CreatureObject.h"
+#include "server/zone/objects/intangible/ShipControlDevice.h"
+#include "server/zone/objects/ship/ShipObject.h"
 
 //TODO: This is very unsafe still...
 class JtlShipListResponse : public ObjectControllerMessage {
 public:
 	JtlShipListResponse(CreatureObject* creo, SceneObject* terminal)
-		: ObjectControllerMessage(creo->getObjectID(), 0x0B, 0x41D) {
+		: ObjectControllerMessage(creo->getObjectID(), 0x0B, 0x41D) 
+	{
+		
+		SceneObject* datapad = creo->getSlottedObject("datapad");
+		Vector<Reference<ShipObject*>> ships;
+		for (int i = 0; i < datapad->getContainerObjectsSize(); i++) 
+		{
+			Reference<SceneObject*> obj =  datapad->getContainerObject(i).castTo<SceneObject*>();
 
-		insertInt(0); // size
+			if (obj != nullptr && obj->isShipControlDevice() )
+			{
+				Reference<ShipControlDevice*> shipController = obj.castTo<ShipControlDevice*>();
+				ManagedReference<TangibleObject*> controlledObject = shipController->getControlledObject();
+				Reference<ShipObject*>ship = controlledObject.castTo<ShipObject*>();
+				ships.add(ship);
+			}
+		}
 
+		insertInt(ships.size()+1); // size
+		insertLong(terminal->getObjectID());
+		insertAscii("tatooine");
+		for (auto &ship : ships) 
+		{
+			insertLong(ship->getObjectID());
+			insertAscii("tatooine");
+		}
+
+		/*insertInt(2); // size
+		insertLong(terminal->getObjectID());
+		insertAscii("tatooine");
 
 		SceneObject* datapad = creo->getSlottedObject("datapad");
-
-		//int offs = getOffset();
-
-		//insertInt(2);
-
-		//insertLong(terminal->getObjectID());
-
-		/* TODO: Better method of this.
-		ManagedReference<ActiveArea*> region = terminal->getActiveRegion();
-
-		if (region != nullptr && region->isRegion())
-			insertAscii(region->getDisplayedName());
-		else
-			insertAscii(terminal->getZone()->getZoneName());
-		*/
-
-		/*
-		insertAscii("cRush Rocks");
-
 		VectorMap<uint64, ManagedReference<SceneObject*> >* datapadObjects = datapad->getContainerObjects();
 
 		for (int i = 0; i < datapadObjects->size(); ++i) {
@@ -52,11 +61,10 @@ public:
 					ManagedReference<ShipObject*> ship = cast<ShipObject*>( shipControlDevice->getControlledObject());
 
 					insertLong(ship->getObjectID());
-					insertAscii("cRush Rocks"); //TODO: Fix to retrieve ship->getParkedLocation();
+					insertAscii("tatooine"); //TODO: Fix to retrieve ship->getParkedLocation();
 				}
 			}
-		}
-		*/
+		}*/
 	}
 };
 
