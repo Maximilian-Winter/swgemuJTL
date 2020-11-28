@@ -299,6 +299,7 @@ bool ShuttleBeaconImplementation::canSpawnShuttle(CreatureObject* player) {
 
 	int x = player->getWorldPositionX();
 	int y = player->getWorldPositionY();
+	int z = player->getWorldPositionZ();
 	int nearbyPerks = 0;
 
 	CloseObjectsVector* vec = (CloseObjectsVector*) player->getCloseObjects();
@@ -306,7 +307,7 @@ bool ShuttleBeaconImplementation::canSpawnShuttle(CreatureObject* player) {
 	if (vec == nullptr)
 		return false;
 
-	SortedVector<QuadTreeEntry*> closeObjects;
+	SortedVector<OctTreeEntry*> closeObjects;
 	vec->safeCopyTo(closeObjects);
 
 	for (int i = 0; i < closeObjects.size(); ++i) {
@@ -335,7 +336,7 @@ bool ShuttleBeaconImplementation::canSpawnShuttle(CreatureObject* player) {
 	}
 
 	SortedVector<ManagedReference<ActiveArea* > > activeAreas;
-	zone->getInRangeActiveAreas(x, y, &activeAreas, true);
+	zone->getInRangeActiveAreas(x, y, z, &activeAreas, true);
 
 	for (int i = 0; i < activeAreas.size(); ++i) {
 		ActiveArea* area = activeAreas.get(i);

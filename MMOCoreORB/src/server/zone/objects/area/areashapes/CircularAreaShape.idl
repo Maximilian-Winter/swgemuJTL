@@ -57,7 +57,7 @@ class CircularAreaShape extends AreaShape {
 	 * @return true if the coordinate is within the area shape.
 	 */
 	@read
-	public native boolean containsPoint(float x, float y);
+	public native boolean containsPoint(float x, float y, float z);
 
 	/**
 	 * Check if the coordinate is within the area shape.

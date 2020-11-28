@@ -147,8 +147,8 @@ void FlagGameImplementation::activateGamePulse() {
 }
 
 void FlagGameImplementation::announceToPlayers(const String& message) {
-	SortedVector<ManagedReference<QuadTreeEntry*> > closeObjects;
-	zone->getInRangeObjects(getPositionX(), getPositionY(), 256, &closeObjects,	true);
+	SortedVector<ManagedReference<OctTreeEntry*> > closeObjects;
+	zone->getInRangeObjects(getPositionX(), getPositionY(), getPositionZ(), 256, &closeObjects,	true);
 
 	for (int i = 0; i < closeObjects.size(); i++) {
 		SceneObject* targetObject = cast<SceneObject*>(closeObjects.get(i).get());
@@ -176,8 +176,8 @@ void FlagGameImplementation::showScores(CreatureObject* player) {
 }
 
 void FlagGameImplementation::doVictoryEffects(uint32 faction) {
-	SortedVector<ManagedReference<QuadTreeEntry*> > closeObjects;
-	zone->getInRangeObjects(getPositionX(), getPositionY(), 256, &closeObjects,	true);
+	SortedVector<ManagedReference<OctTreeEntry*> > closeObjects;
+	zone->getInRangeObjects(getPositionX(), getPositionY(), getPositionZ(), 256, &closeObjects,	true);
 
 	for (int i = 0; i < closeObjects.size(); i++) {
 		SceneObject* targetObject = cast<SceneObject*>(closeObjects.get(i).get());

@@ -9,21 +9,43 @@ include engine.util.u3d.Vector3;
 
 class RectangularAreaShape extends AreaShape {
 
-	/** The bottom left corner of the rectangle. */
-	protected float blX;
-	protected float blY;
+	/** The bottom bottom left corner of the rectangle. */
+	protected float bblX;
+	protected float bblY;
+	protected float bblZ;
 
-	/** The upper right corner of the rectangle. */
-	protected float urX;
-	protected float urY;
+	/** The bottom upper right corner of the rectangle. */
+	protected float burX;
+	protected float burY;
+	protected float burZ;
+
+	/** The top bottom left corner of the rectangle. */
+	protected float tblX;
+	protected float tblY;
+	protected float tblZ;
+
+	/** The top upper right corner of the rectangle. */
+	protected float turX;
+	protected float turY;
+	protected float turZ;
+
+	protected float length;
 
 	/** Constructor */
 	public RectangularAreaShape() {
 		super();
-		blX = 0;
-		blY = 0;
-		urX = 0;
-		urY = 0;
+		bblX = 0;
+		bblY = 0;
+		bblZ = 0;
+		burX = 0;
+		burY = 0;
+		burZ = 0;
+		tblX = 0;
+		tblY = 0;
+		tblZ = 0;
+		turX = 0;
+		turY = 0;
+		turZ = 0;
 	}
 
 	/**
@@ -32,11 +54,19 @@ class RectangularAreaShape extends AreaShape {
 	 * @param w the width of the rectangle.
 	 */
 	@preLocked
-	public void setDimensions(float x1, float y1, float x2, float y2) {
-		blX = x1;
-		blY = y1;
-		urX = x2;
-		urY = y2;
+	public void setDimensions(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4) {
+		bblX = x1;
+		bblY = y1;
+		bblZ = z1;
+		burX = x2;
+		burY = y2;
+		burZ = z2;
+		tblX = x3;
+		tblY = y3;
+		tblZ = z3;
+		turX = x4;
+		turY = y4;
+		turZ = z4;
 	}
 
 	/**
@@ -45,7 +75,12 @@ class RectangularAreaShape extends AreaShape {
 	 */
 	@read
 	public float getHeight() {
-		return urY - blY;
+		return burY - bblY;
+	}
+
+	@read
+	public float getLength() {
+		return tblZ - bblZ;
 	}
 
 	/**
@@ -54,7 +89,7 @@ class RectangularAreaShape extends AreaShape {
 	 */
 	@read
 	public float getWidth() {
-		return urX - blX;
+		return burX - bblX;
 	}
 
 	/**
@@ -64,7 +99,7 @@ class RectangularAreaShape extends AreaShape {
 	 * @return true if the coordinate is within the area shape.
 	 */
 	@read
-	public native boolean containsPoint(float x, float y);
+	public native boolean containsPoint(float x, float y, float z);
 
 	/**
 	 * Check if the coordinate is within the area shape.
@@ -142,6 +177,6 @@ class RectangularAreaShape extends AreaShape {
 	 */
 	@read
 	public float getArea() {
-		return getHeight() * getWidth();
+		return getHeight() * getWidth() * getLength();
 	}
 }

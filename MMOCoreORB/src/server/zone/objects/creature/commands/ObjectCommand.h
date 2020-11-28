@@ -172,10 +172,10 @@ public:
 					return GENERALERROR;
 
 				// Find all objects in range
-				SortedVector<QuadTreeEntry*> closeObjects;
+				SortedVector<OctTreeEntry*> closeObjects;
 				CloseObjectsVector* closeObjectsVector = (CloseObjectsVector*) creature->getCloseObjects();
 				if (closeObjectsVector == nullptr) {
-					zone->getInRangeObjects(creature->getPositionX(), creature->getPositionY(), range, &closeObjects, true);
+					zone->getInRangeObjects(creature->getPositionX(), creature->getPositionY(), creature->getPositionZ(), range, &closeObjects, true);
 				} else {
 					closeObjectsVector->safeCopyTo(closeObjects);
 				}

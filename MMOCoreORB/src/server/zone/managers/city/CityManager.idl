@@ -91,7 +91,7 @@ class CityManager extends ManagedService implements Logger {
 
 	@preLocked
 	@arg1preLocked
-	public native CityRegion createCity(CreatureObject mayor, final string cityName, float x, float y);
+	public native CityRegion createCity(CreatureObject mayor, final string cityName, float x, float y, float z);
 
 	public native void assessCitizens(CityRegion city);
 

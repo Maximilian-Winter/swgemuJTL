@@ -309,7 +309,7 @@ void CreatureObjectImplementation::sendToOwner(bool doClose) {
 
 	fatal(vec != nullptr) << "close objects vector in creo::sendToOwner null";
 
-	SortedVector<QuadTreeEntry*> closeObjects;
+	SortedVector<OctTreeEntry*> closeObjects;
 	vec->safeCopyTo(closeObjects);
 
 	for (int i = 0; i < closeObjects.size(); ++i) {
@@ -804,14 +804,14 @@ bool CreatureObjectImplementation::setState(uint64 state, bool notifyClient) {
 				setPosture(CreaturePosture::SITTING, false);
 
 				if (thisZone != nullptr) {
-					SortedVector<QuadTreeEntry*> closeSceneObjects;
+					SortedVector<OctTreeEntry*> closeSceneObjects;
 					int maxInRangeObjects = 0;
 
 					if (closeobjects == nullptr) {
 #ifdef COV_DEBUG
 						info("Null closeobjects vector in CreatureObjectImplementation::setState", true);
 #endif
-						thisZone->getInRangeObjects(getWorldPositionX(), getWorldPositionY(), ZoneServer::CLOSEOBJECTRANGE, &closeSceneObjects, true);
+						thisZone->getInRangeObjects(getWorldPositionX(), getWorldPositionY(), getWorldPositionZ(), ZoneServer::CLOSEOBJECTRANGE, &closeSceneObjects, true);
 						maxInRangeObjects = closeSceneObjects.size();
 					} else {
 						closeobjects->safeCopyReceiversTo(closeSceneObjects, CloseObjectsVector::PLAYERTYPE);
@@ -2138,7 +2138,7 @@ void CreatureObjectImplementation::notifyLoadFromDatabase() {
 		ghost->setLinkDead();
 }
 
-void CreatureObjectImplementation::notifyInsert(QuadTreeEntry* obj) {
+void CreatureObjectImplementation::notifyInsert(OctTreeEntry* obj) {
 	auto linkedCreature = getLinkedCreature().get();
 
 	if (linkedCreature != nullptr && linkedCreature->getParent() == asCreatureObject()) {
@@ -2156,7 +2156,7 @@ void CreatureObjectImplementation::notifyInsert(QuadTreeEntry* obj) {
 	TangibleObjectImplementation::notifyInsert(obj);
 }
 
-void CreatureObjectImplementation::notifyDissapear(QuadTreeEntry* obj) {
+void CreatureObjectImplementation::notifyDissapear(OctTreeEntry* obj) {
 	auto linkedCreature = getLinkedCreature().get();
 
 	if (linkedCreature != nullptr && linkedCreature->getParent() == asCreatureObject()) {
@@ -2173,7 +2173,7 @@ void CreatureObjectImplementation::notifyDissapear(QuadTreeEntry* obj) {
 	TangibleObjectImplementation::notifyDissapear(obj);
 }
 
-void CreatureObjectImplementation::notifyPositionUpdate(QuadTreeEntry* entry) {
+void CreatureObjectImplementation::notifyPositionUpdate(OctTreeEntry* entry) {
 	auto linkedCreature = getLinkedCreature().get();
 
 	if (linkedCreature != nullptr && linkedCreature->getParent() == asCreatureObject()) {
@@ -3390,7 +3390,7 @@ void CreatureObjectImplementation::setFaction(unsigned int crc) {
 		if (currentZone != nullptr) {
 			// Notify nearby active areas of faction change
 			SortedVector<ManagedReference<ActiveArea* > > activeAreas;
-			currentZone->getInRangeActiveAreas(player->getPositionX(), player->getPositionY(), &activeAreas, true);
+			currentZone->getInRangeActiveAreas(player->getPositionX(), player->getPositionY(), player->getPositionZ(), &activeAreas, true);
 
 			for (int i = 0; i < activeAreas.size(); i++) {
 				ActiveArea* area = activeAreas.get(i);
@@ -3662,7 +3662,7 @@ void CreatureObjectImplementation::removeOutOfRangeObjects() {
 	if (parent != nullptr && (parent->isVehicleObject() || parent->isMount()))
 		creature = parent;
 
-	SortedVector<QuadTreeEntry*> closeObjects;
+	SortedVector<OctTreeEntry*> closeObjects;
 	auto closeObjectsVector = creature->getCloseObjects();
 
 	if (closeObjectsVector == nullptr)
@@ -3753,10 +3753,10 @@ void CreatureObjectImplementation::synchronizeCloseObjects() {
 	if (parentCloseObjectsVector == nullptr)
 		return;
 
-	SortedVector<QuadTreeEntry*> closeObjects;
+	SortedVector<OctTreeEntry*> closeObjects;
 	closeObjectsVector->safeCopyTo(closeObjects);
 
-	SortedVector<QuadTreeEntry*> parentCloseObjects;
+	SortedVector<OctTreeEntry*> parentCloseObjects;
 	parentCloseObjectsVector->safeCopyTo(parentCloseObjects);
 
 	VectorMap<ManagedReference<SceneObject*>, uint8> diff;

@@ -65,14 +65,14 @@ public:
 		}
 
 		//Get nearby objects from player
-		SortedVector<ManagedReference<QuadTreeEntry*> > closeObjects;
+		SortedVector<ManagedReference<OctTreeEntry*> > closeObjects;
 		Zone* zone = creature->getZone();
 
 		if (creature->getCloseObjects() == nullptr || range > ZoneServer::CLOSEOBJECTRANGE) {
 #ifdef COV_DEBUG
 			creature->info("Null closeobjects vector in BroadcastAreaCommand::doQueueCommand", true);
 #endif
-			zone->getInRangeObjects(creature->getPositionX(), creature->getPositionY(), range, &closeObjects, true);
+			zone->getInRangeObjects(creature->getPositionX(), creature->getPositionY(),creature->getPositionZ(), range, &closeObjects, true);
 		}
 		else {
 			CloseObjectsVector* closeVector = (CloseObjectsVector*) creature->getCloseObjects();

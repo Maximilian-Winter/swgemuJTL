@@ -9,19 +9,19 @@
 #include "events/ActiveAreaEvent.h"
 #include "server/zone/objects/area/areashapes/AreaShape.h"
 
-bool ActiveAreaImplementation::containsPoint(float px, float py, uint64 cellid) const {
+bool ActiveAreaImplementation::containsPoint(float px, float py, float pz, uint64 cellid) const {
 	if (cellObjectID != 0 && cellObjectID != cellid)
 		return false;
 
-	return containsPoint(px, py);
+	return containsPoint(px, py, pz);
 }
 
-bool ActiveAreaImplementation::containsPoint(float px, float py) const {
+bool ActiveAreaImplementation::containsPoint(float px, float py,  float pz) const {
 	if (areaShape == nullptr) {
-		return QuadTreeEntryImplementation::containsPoint(px, py);
+		return OctTreeEntryImplementation::containsPoint(px, py, pz);
 	}
 
-	return areaShape->containsPoint(px, py);
+	return areaShape->containsPoint(px, py, pz);
 }
 
 void ActiveAreaImplementation::enqueueEnterEvent(SceneObject* obj) {
@@ -56,7 +56,6 @@ void ActiveAreaImplementation::notifyEnter(SceneObject* obj) {
 			for (int i = 0; i < scene.size(); i++) {
 				SceneObject* scenery = scene.get(i);
 				Locker locker(scenery);
-
 				scenery->sendTo(sceno, true);
 			}
 		}, "SendSceneryLambda");

@@ -84,7 +84,7 @@ void GroupObjectImplementation::broadcastMessage(CreatureObject* player, BaseMes
 
 void GroupObjectImplementation::updatePvPStatusNearCreature(CreatureObject* creature) {
 	CloseObjectsVector* creatureCloseObjects = (CloseObjectsVector*) creature->getCloseObjects();
-	SortedVector<QuadTreeEntry*> closeObjectsVector;
+	SortedVector<OctTreeEntry*> closeObjectsVector;
 
 	creatureCloseObjects->safeCopyReceiversTo(closeObjectsVector, CloseObjectsVector::CREOTYPE);
 

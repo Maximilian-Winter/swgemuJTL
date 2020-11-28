@@ -202,9 +202,9 @@ TEST_F(ZoneTest, InRangeTest) {
 
 	ASSERT_TRUE(scene->getZone() != nullptr);
 
-	SortedVector<ManagedReference<QuadTreeEntry*> > objects;
+	SortedVector<ManagedReference<OctTreeEntry*> > objects;
 
-	zone->getInRangeObjects(0, 0, 128, &objects, true);
+	zone->getInRangeObjects(0, 0, 0, 128, &objects, true);
 
 	ASSERT_EQ(objects.size(), 1);
 
@@ -212,13 +212,13 @@ TEST_F(ZoneTest, InRangeTest) {
 
 	objects.removeAll();
 
-	zone->getInRangeObjects(0, 0, 128, &objects, true);
+	zone->getInRangeObjects(0, 0, 0, 128, &objects, true);
 
 	ASSERT_EQ(objects.size(), 0);
 
 	objects.removeAll();
 
-	zone->getInRangeObjects(1000, 1000, 128, &objects, true);
+	zone->getInRangeObjects(1000, 1000, 1000, 128, &objects, true);
 
 	ASSERT_EQ(objects.size(), 1);
 
@@ -234,7 +234,7 @@ TEST_F(ZoneTest, InRangeTest) {
 
 	objects.removeAll();
 
-	zone->getInRangeObjects(1000, 1000, 128, &objects, true);
+	zone->getInRangeObjects(1000, 1000 , 1000, 128, &objects, true);
 
 	ASSERT_EQ(objects.size(), 2);
 
@@ -248,7 +248,7 @@ TEST_F(ZoneTest, InRangeTest) {
 
 	objects.removeAll();
 
-	zone->getInRangeObjects(1000, 1000, 128, &objects, true);
+	zone->getInRangeObjects(1000, 1000, 1000, 128, &objects, true);
 
 	ASSERT_EQ(objects.size(), 0);
 }

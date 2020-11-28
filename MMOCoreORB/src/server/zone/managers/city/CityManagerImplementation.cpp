@@ -193,7 +193,7 @@ void CityManagerImplementation::stop() {
 	cities.removeAll();
 }
 
-CityRegion* CityManagerImplementation::createCity(CreatureObject* mayor, const String& cityName, float x, float y) {
+CityRegion* CityManagerImplementation::createCity(CreatureObject* mayor, const String& cityName, float x, float y, float z) {
 	ManagedReference<CityRegion*> city = new CityRegion(true);
 	ObjectManager::instance()->persistObject(city, 1, "cityregions");
 
@@ -203,7 +203,7 @@ CityRegion* CityManagerImplementation::createCity(CreatureObject* mayor, const S
 	city->setZone(mayor->getZone());
 	city->setCityRank(OUTPOST);
 	city->setMayorID(mayor->getObjectID());
-	Region* region = city->addRegion(x, y, radiusPerRank.get(OUTPOST - 1), true);
+	Region* region = city->addRegion(x, y, z, radiusPerRank.get(OUTPOST - 1), true);
 
 	city->resetVotingPeriod();
 	city->setAssessmentPending(true);

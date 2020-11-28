@@ -111,10 +111,10 @@ class ActiveArea extends SceneObject {
 	}
 
 	@read
-	public native boolean containsPoint(float x, float y, unsigned long cellid);
+	public native boolean containsPoint(float x, float y, float z, unsigned long cellid);
 
 	@read
-	public abstract native boolean containsPoint(float x, float y);
+	public abstract native boolean containsPoint(float x, float y, float z);
 
 	@read
 	public float getRadius2() {

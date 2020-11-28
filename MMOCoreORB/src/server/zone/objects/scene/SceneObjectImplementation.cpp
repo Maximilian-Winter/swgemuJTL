@@ -555,7 +555,7 @@ void SceneObjectImplementation::broadcastObjectPrivate(SceneObject* object, Scen
 	if (zone == nullptr)
 		return;
 
-	SortedVector<QuadTreeEntry*> closeSceneObjects;
+	SortedVector<OctTreeEntry*> closeSceneObjects;
 
 	int maxInRangeObjectCount = 0;
 
@@ -563,7 +563,7 @@ void SceneObjectImplementation::broadcastObjectPrivate(SceneObject* object, Scen
 #ifdef COV_DEBUG
 		info("Null closeobjects vector in SceneObjectImplementation::broadcastObjectPrivate", true);
 #endif
-		zone->getInRangeObjects(getPositionX(), getPositionY(), getOutOfRangeDistance(), &closeSceneObjects, true);
+		zone->getInRangeObjects(getPositionX(), getPositionY(),getPositionZ(), getOutOfRangeDistance(), &closeSceneObjects, true);
 
 		maxInRangeObjectCount = closeSceneObjects.size();
 	} else {
@@ -607,14 +607,14 @@ void SceneObjectImplementation::broadcastDestroyPrivate(SceneObject* object, Sce
 	if (zone == nullptr)
 		return;
 
-	SortedVector<QuadTreeEntry*> closeSceneObjects;
+	SortedVector<OctTreeEntry*> closeSceneObjects;
 	int maxInRangeObjectCount = 0;
 
 	if (closeobjects == nullptr) {
 #ifdef COV_DEBUG
 		info("Null closeobjects vector in SceneObjectImplementation::broadcastDestroyPrivate", true);
 #endif
-		zone->getInRangeObjects(getPositionX(), getPositionY(), getOutOfRangeDistance() + 64, &closeSceneObjects, true);
+		zone->getInRangeObjects(getPositionX(), getPositionY(),getPositionZ(), getOutOfRangeDistance() + 64, &closeSceneObjects, true);
 
 		maxInRangeObjectCount = closeSceneObjects.size();
 	} else {
@@ -669,14 +669,14 @@ void SceneObjectImplementation::broadcastMessagePrivate(BasePacket* message, Sce
 		return;
 	}
 
-	SortedVector<QuadTreeEntry*> closeNoneReference;
+	SortedVector<OctTreeEntry*> closeNoneReference;
 
 	try {
 		if (closeobjects == nullptr) {
 #ifdef COV_DEBUG
 			info(String::valueOf(getObjectID()) + " Null closeobjects vector in SceneObjectImplementation::broadcastMessagePrivate", true);
 #endif
-			zone->getInRangeObjects(getPositionX(), getPositionY(), getOutOfRangeDistance(), &closeNoneReference, true);
+			zone->getInRangeObjects(getPositionX(), getPositionY(),getPositionZ(), getOutOfRangeDistance(), &closeNoneReference, true);
 		} else {
 			closeobjects->safeCopyReceiversTo(closeNoneReference, CloseObjectsVector::PLAYERTYPE);
 		}
@@ -753,7 +753,7 @@ void SceneObjectImplementation::broadcastMessagesPrivate(Vector<BasePacket*>* me
 		return;
 	}
 
-	SortedVector<QuadTreeEntry*> closeSceneObjects;
+	SortedVector<OctTreeEntry*> closeSceneObjects;
 
 	try {
 
@@ -761,7 +761,7 @@ void SceneObjectImplementation::broadcastMessagesPrivate(Vector<BasePacket*>* me
 #ifdef COV_DEBUG
 			info(true) << getObjectID() << " Null closeobjects vector in SceneObjectImplementation::broadcastMessagesPrivate";
 #endif
-			zone->getInRangeObjects(getPositionX(), getPositionY(), getOutOfRangeDistance(), &closeSceneObjects, true);
+			zone->getInRangeObjects(getPositionX(), getPositionY(),getPositionZ(), getOutOfRangeDistance(), &closeSceneObjects, true);
 		} else {
 			closeobjects->safeCopyReceiversTo(closeSceneObjects, CloseObjectsVector::PLAYERTYPE);
 		}
@@ -820,13 +820,13 @@ int SceneObjectImplementation::inRangeObjects(unsigned int gameObjectType, float
 
 	int numberOfObjects = 0;
 
-	SortedVector<QuadTreeEntry*> closeSceneObjects;
+	SortedVector<OctTreeEntry*> closeSceneObjects;
 
 	if (closeobjects == nullptr) {
 #ifdef COV_DEBUG
 		info("Null closeobjects vector in SceneObjectImplementation::inRangeObjects", true);
 #endif
-		zone->getInRangeObjects(getPositionX(), getPositionY(), range, &closeSceneObjects, true);
+		zone->getInRangeObjects(getPositionX(), getPositionY(), getPositionZ(),range, &closeSceneObjects, true);
 	} else {
 		closeobjects->safeCopyTo(closeSceneObjects);
 	}
@@ -880,7 +880,7 @@ void SceneObjectImplementation::notifyCloseContainer(CreatureObject* player) {
 	notifyObservers(ObserverEventType::CLOSECONTAINER, player);
 }
 
-void SceneObjectImplementation::notifyPositionUpdate(QuadTreeEntry* entry) {
+void SceneObjectImplementation::notifyPositionUpdate(OctTreeEntry* entry) {
 	if (entry == nullptr || asSceneObject() == entry)
 		return;
 
@@ -1010,7 +1010,7 @@ SceneObject* SceneObjectImplementation::getRootParentUnsafe() {
 		return savedRootParent;
 	}
 
-	return static_cast<SceneObject*>(QuadTreeEntryImplementation::getRootParentUnsafe());
+	return static_cast<SceneObject*>(OctTreeEntryImplementation::getRootParentUnsafe());
 }
 
 void SceneObjectImplementation::updateSavedRootParentRecursive(SceneObject* newRoot, int maxDepth) {
@@ -1049,7 +1049,7 @@ void SceneObjectImplementation::updateSavedRootParentRecursive(SceneObject* newR
 }
 
 uint64 SceneObjectImplementation::getParentID() {
-	return QuadTreeEntryImplementation::parent.getSavedObjectID();
+	return OctTreeEntryImplementation::parent.getSavedObjectID();
 }
 
 Reference<SceneObject*> SceneObjectImplementation::getParentRecursively(uint32 gameObjectType) {
@@ -1539,32 +1539,32 @@ void SceneObjectImplementation::showFlyText(const String& file, const String& au
 void SceneObjectImplementation::initializeChildObject(SceneObject* controllerObject) {
 }
 
-void SceneObjectImplementation::setParent(QuadTreeEntry* entry) {
+void SceneObjectImplementation::setParent(OctTreeEntry* entry) {
 	Locker locker(&parentLock);
 
 	savedRootParent = nullptr;
 
-	QuadTreeEntryImplementation::setParent(entry);
+	OctTreeEntryImplementation::setParent(entry);
 
 	locker.release();
 
 	updateSavedRootParentRecursive(getRootParent());
 }
 
-void SceneObjectImplementation::setParent(QuadTreeEntry* entry, bool updateRecursively) {
+void SceneObjectImplementation::setParent(OctTreeEntry* entry, bool updateRecursively) {
 	if (updateRecursively) {
 		setParent(entry);
 	} else {
 		Locker locker(&parentLock);
 
-		QuadTreeEntryImplementation::setParent(entry);
+		OctTreeEntryImplementation::setParent(entry);
 	}
 }
 
 ManagedWeakReference<SceneObject*> SceneObjectImplementation::getParent() {
 	/*Locker locker(&parentLock);
 
-	ManagedReference<QuadTreeEntry*> parent = this->parent.get();
+	ManagedReference<OctTreeEntry*> parent = this->parent.get();
 
 	if (parent == nullptr)
 		return nullptr;
@@ -1918,7 +1918,7 @@ bool SceneObjectImplementation::isInNavMesh() {
 		return false;
 
 	SortedVector<ManagedReference<NavArea*> > areas;
-	int ret = zone->getInRangeNavMeshes(getWorldPositionX(), getWorldPositionY(), &areas, false);
+	int ret = zone->getInRangeNavMeshes(getWorldPositionX(), getWorldPositionY(),getWorldPositionZ(), &areas, false);
 
 	return ret > 0;
 }

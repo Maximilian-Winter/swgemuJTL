@@ -41,7 +41,7 @@ include system.util.SortedVector;
 include system.lang.ref.WeakReference;
 include engine.log.Logger;
 include server.zone.CloseObjectsVector;
-include server.zone.QuadTreeEntry;
+include server.zone.OctTreeEntry;
 import system.util.SynchronizedVectorMap;
 import server.zone.managers.auction.AuctionSearchTask;
 
@@ -1177,14 +1177,14 @@ class CreatureObject extends TangibleObject {
 	public native void notifyLoadFromDatabase();
 
 	@local
-	public native void notifyInsert(QuadTreeEntry obj);
+	public native void notifyInsert(OctTreeEntry obj);
 
 	@local
-	public native void notifyDissapear(QuadTreeEntry obj);
+	public native void notifyDissapear(OctTreeEntry obj);
 
 	@dirty
 	@local
-	public native void notifyPositionUpdate(QuadTreeEntry entry);
+	public native void notifyPositionUpdate(OctTreeEntry entry);
 
 	/**
 	 * Destroys this object from database

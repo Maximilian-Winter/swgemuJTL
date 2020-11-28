@@ -44,7 +44,8 @@ public:
 			zoneName = zone->getZoneName();
 
 			PlanetManager* planetManager = zone->getPlanetManager();
-			CityRegion* cityRegion = planetManager->getRegionAt(player->getWorldPositionX(), player->getWorldPositionY());
+			//OBACHT
+			CityRegion* cityRegion = planetManager->getRegionAt(player->getWorldPositionX(), player->getWorldPositionY(), player->getWorldPositionZ());
 
 			if (cityRegion != nullptr)
 				regionName = cityRegion->getRegionName();

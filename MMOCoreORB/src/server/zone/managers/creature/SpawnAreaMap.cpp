@@ -75,6 +75,7 @@ void SpawnAreaMap::readAreaObject(LuaObject& areaObj) {
 	String name = areaObj.getStringAt(1);
 	float x = areaObj.getFloatAt(2);
 	float y = areaObj.getFloatAt(3);
+	float z = areaObj.getFloatAt(4);
 	int tier = areaObj.getIntAt(5);
 
 	if (tier == UNDEFINEDAREA)
@@ -83,6 +84,13 @@ void SpawnAreaMap::readAreaObject(LuaObject& areaObj) {
 	float radius = 0;
 	float x2 = 0;
 	float y2 = 0;
+	float z2 = 0;
+	float x3 = 0;
+	float y3 = 0;
+	float z3 = 0;
+	float x4 = 0;
+	float y4 = 0;
+	float z4 = 0;
 	float innerRadius = 0;
 	float outerRadius = 0;
 
@@ -106,6 +114,16 @@ void SpawnAreaMap::readAreaObject(LuaObject& areaObj) {
 		y2 = areaShapeObject.getFloatAt(3);
 		int rectWidth = x2 - x;
 		int rectHeight = y2 - y;
+
+		z2 = z;
+		x3 = x;
+		y3 = y;
+		z3 = z + rectHeight;
+
+		x4 = x2;
+		y4 = y2;
+		z4 = z + rectHeight;
+
 
 		if (!(tier & WORLDSPAWNAREA) && (rectWidth <= 0 || rectHeight <= 0)) {
 			error("Invalid corner coordinates for rectangular spawn region " + name + ", total height: " + String::valueOf(rectHeight) + ", total width: " + String::valueOf(rectWidth));
@@ -149,15 +167,16 @@ void SpawnAreaMap::readAreaObject(LuaObject& areaObj) {
 	if (areaType == RECTANGLE) {
 		ManagedReference<RectangularAreaShape*> rectangularAreaShape = new RectangularAreaShape();
 		Locker shapeLocker(rectangularAreaShape);
-		rectangularAreaShape->setDimensions(x, y, x2, y2);
+		rectangularAreaShape->setDimensions(x, y, z, x2, y2, z2, x3, y3, z3, x4, y4, z4);
 		float centerX = x + ((x2 - x) / 2);
 		float centerY = y + ((y2 - y) / 2);
-		rectangularAreaShape->setAreaCenter(centerX, centerY);
+		float centerZ = z + ((z3 - z) / 2);
+		rectangularAreaShape->setAreaCenter(centerX, centerY, centerZ);
 		area->setAreaShape(rectangularAreaShape);
 	} else if (areaType == CIRCLE) {
 		ManagedReference<CircularAreaShape*> circularAreaShape = new CircularAreaShape();
 		Locker shapeLocker(circularAreaShape);
-		circularAreaShape->setAreaCenter(x, y);
+		circularAreaShape->setAreaCenter(x, y, z);
 
 		if (radius > 0)
 			circularAreaShape->setRadius(radius);
@@ -168,14 +187,14 @@ void SpawnAreaMap::readAreaObject(LuaObject& areaObj) {
 	} else if (areaType == RING) {
 		ManagedReference<RingAreaShape*> ringAreaShape = new RingAreaShape();
 		Locker shapeLocker(ringAreaShape);
-		ringAreaShape->setAreaCenter(x, y);
+		ringAreaShape->setAreaCenter(x, y, z);
 		ringAreaShape->setInnerRadius(innerRadius);
 		ringAreaShape->setOuterRadius(outerRadius);
 		area->setAreaShape(ringAreaShape);
 	}
 
 	area->setTier(tier);
-	area->initializePosition(x, 0, y);
+	area->initializePosition(x, z, y);
 
 	if (tier & SPAWNAREA) {
 		area->setMaxSpawnLimit(areaObj.getIntAt(7));

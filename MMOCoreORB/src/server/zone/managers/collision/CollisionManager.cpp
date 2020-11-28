@@ -81,8 +81,8 @@ const AppearanceTemplate* CollisionManager::getCollisionAppearance(SceneObject* 
 bool CollisionManager::checkSphereCollision(const Vector3& origin, float radius, Zone* zone) {
 	Vector3 sphereOrigin(origin.getX(), origin.getZ(), origin.getY());
 
-	SortedVector<ManagedReference<QuadTreeEntry*> > objects(512, 512);
-	zone->getInRangeObjects(origin.getX(), origin.getY(), 512, &objects, true);
+	SortedVector<ManagedReference<OctTreeEntry*> > objects(512, 512);
+	zone->getInRangeObjects(origin.getX(), origin.getY(),origin.getZ(), 512, &objects, true);
 
 	for (int i = 0; i < objects.size(); ++i) {
 
@@ -148,8 +148,8 @@ bool CollisionManager::checkLineOfSightWorldToCell(const Vector3& rayOrigin, con
 }
 
 bool CollisionManager::checkMovementCollision(CreatureObject* creature, float x, float z, float y, Zone* zone) {
-	SortedVector<ManagedReference<QuadTreeEntry*> > closeObjects;
-	zone->getInRangeObjects(x, y, 128, &closeObjects, true);
+	SortedVector<ManagedReference<OctTreeEntry*> > closeObjects;
+	zone->getInRangeObjects(x, y, z, 128, &closeObjects, true);
 
 	//Vector3 rayStart(x, z + 0.25, y);
 	//Vector3 rayStart(creature->getWorldPositionX(), creature->getWorldPositionZ(), creature->getPos)
@@ -267,8 +267,8 @@ float CollisionManager::getWorldFloorCollision(float x, float y, float z, Zone* 
 	if (planetManager == nullptr)
 		return 0.f;
 
-	SortedVector<QuadTreeEntry*> closeObjects;
-	zone->getInRangeObjects(x, y, 128, &closeObjects, true, false);
+	SortedVector<OctTreeEntry*> closeObjects;
+	zone->getInRangeObjects(x, y, z, 128, &closeObjects, true, false);
 
 	float height = 0;
 
@@ -317,8 +317,7 @@ float CollisionManager::getWorldFloorCollision(float x, float y, float z, Zone* 
 }
 
 float CollisionManager::getWorldFloorCollision(float x, float y, Zone* zone, bool testWater) {
-	SortedVector<QuadTreeEntry*> closeObjects;
-	zone->getInRangeObjects(x, y, 128, &closeObjects, true, false);
+	
 
 	PlanetManager* planetManager = zone->getPlanetManager();
 
@@ -331,6 +330,8 @@ float CollisionManager::getWorldFloorCollision(float x, float y, Zone* zone, boo
 
 	//need to include exclude affectors in the terrain calcs
 	height = terrainManager->getHeight(x, y);
+	SortedVector<OctTreeEntry*> closeObjects;
+	zone->getInRangeObjects(x, y,height, 128, &closeObjects, true, false);
 
 	Vector3 rayStart(x, 16384.f, y);
 	Vector3 rayEnd(x, -16384.f, y);
@@ -371,7 +372,7 @@ float CollisionManager::getWorldFloorCollision(float x, float y, Zone* zone, boo
 
 void CollisionManager::getWorldFloorCollisions(float x, float y, Zone* zone, SortedVector<IntersectionResult>* result, CloseObjectsVector* closeObjectsVector) {
 	if (closeObjectsVector != nullptr) {
-		Vector<QuadTreeEntry*> closeObjects(closeObjectsVector->size(), 10);
+		Vector<OctTreeEntry*> closeObjects(closeObjectsVector->size(), 10);
 		closeObjectsVector->safeCopyReceiversTo(closeObjects, CloseObjectsVector::COLLIDABLETYPE);
 
 		getWorldFloorCollisions(x, y, zone, result, closeObjects);
@@ -379,15 +380,15 @@ void CollisionManager::getWorldFloorCollisions(float x, float y, Zone* zone, Sor
 #ifdef COV_DEBUG
 		zone->info("Null closeobjects vector in CollisionManager::getWorldFloorCollisions", true);
 #endif
-		SortedVector<ManagedReference<QuadTreeEntry*> > closeObjects;
+		SortedVector<ManagedReference<OctTreeEntry*> > closeObjects;
 
-		zone->getInRangeObjects(x, y, 128, &closeObjects, true);
+		zone->getInRangeObjects(x, y, zone->getHeight(x, y), 128, &closeObjects, true);
 
 		getWorldFloorCollisions(x, y, zone, result, closeObjects);
 	}
 }
 
-void CollisionManager::getWorldFloorCollisions(float x, float y, Zone* zone, SortedVector<IntersectionResult>* result, const SortedVector<ManagedReference<QuadTreeEntry*> >& inRangeObjects) {
+void CollisionManager::getWorldFloorCollisions(float x, float y, Zone* zone, SortedVector<IntersectionResult>* result, const SortedVector<ManagedReference<OctTreeEntry*> >& inRangeObjects) {
 	Vector3 rayStart(x, 16384.f, y);
 	Vector3 rayEnd(x, -16384.f, y);
 
@@ -403,7 +404,7 @@ void CollisionManager::getWorldFloorCollisions(float x, float y, Zone* zone, Sor
 	}
 }
 
-void CollisionManager::getWorldFloorCollisions(float x, float y, Zone* zone, SortedVector<IntersectionResult>* result, const Vector<QuadTreeEntry*>& inRangeObjects) {
+void CollisionManager::getWorldFloorCollisions(float x, float y, Zone* zone, SortedVector<IntersectionResult>* result, const Vector<OctTreeEntry*>& inRangeObjects) {
 	Vector3 rayStart(x, 16384.f, y);
 	Vector3 rayEnd(x, -16384.f, y);
 
@@ -453,8 +454,8 @@ bool CollisionManager::checkLineOfSight(SceneObject* object1, SceneObject* objec
 	float heightOrigin = 1.f;
 	float heightEnd = 1.f;
 
-	UniqueReference<SortedVector<QuadTreeEntry*>* > closeObjectsNonReference;/* new SortedVector<QuadTreeEntry* >();*/
-	UniqueReference<SortedVector<ManagedReference<QuadTreeEntry*> >*> closeObjects;/*new SortedVector<ManagedReference<QuadTreeEntry*> >();*/
+	UniqueReference<SortedVector<OctTreeEntry*>* > closeObjectsNonReference;/* new SortedVector<OctTreeEntry* >();*/
+	UniqueReference<SortedVector<ManagedReference<OctTreeEntry*> >*> closeObjects;/*new SortedVector<ManagedReference<OctTreeEntry*> >();*/
 
 	int maxInRangeObjectCount = 0;
 
@@ -463,10 +464,10 @@ bool CollisionManager::checkLineOfSight(SceneObject* object1, SceneObject* objec
 		object1->info("Null closeobjects vector in CollisionManager::checkLineOfSight for " + object1->getDisplayedName(), true);
 #endif
 
-		closeObjects = new SortedVector<ManagedReference<QuadTreeEntry*> >();
-		zone->getInRangeObjects(object1->getPositionX(), object1->getPositionY(), 512, closeObjects, true);
+		closeObjects = new SortedVector<ManagedReference<OctTreeEntry*> >();
+		zone->getInRangeObjects(object1->getPositionX(), object1->getPositionY(), object1->getPositionZ(), 512, closeObjects, true);
 	} else {
-		closeObjectsNonReference = new SortedVector<QuadTreeEntry* >();
+		closeObjectsNonReference = new SortedVector<OctTreeEntry* >();
 
 		CloseObjectsVector* vec = (CloseObjectsVector*) object1->getCloseObjects();
 		vec->safeCopyReceiversTo(*closeObjectsNonReference.get(), CloseObjectsVector::COLLIDABLETYPE);
@@ -672,8 +673,8 @@ bool CollisionManager::checkShipCollision(ShipObject* ship, const Vector3& targe
 	float intersectionDistance;
 	Triangle* triangle = nullptr;
 
-	SortedVector<ManagedReference<QuadTreeEntry*> > objects(512, 512);
-	zone->getInRangeObjects(targetPosition.getX(), targetPosition.getY(), 512, &objects, true, false);
+	SortedVector<ManagedReference<OctTreeEntry*> > objects(512, 512);
+	zone->getInRangeObjects(targetPosition.getX(), targetPosition.getY(), targetPosition.getZ(), 512, &objects, true, false);
 
 	for (int i = 0; i < objects.size(); ++i) {
 		const AppearanceTemplate *app = nullptr;

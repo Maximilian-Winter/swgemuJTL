@@ -12,9 +12,9 @@
 
 class PlayerZoneComponent : public ZoneComponent {
 public:
-	void notifyInsert(SceneObject* sceneObject, QuadTreeEntry* entry) const;
+	void notifyInsert(SceneObject* sceneObject, OctTreeEntry* entry) const;
 
-	void notifyDissapear(SceneObject* sceneObject, QuadTreeEntry* entry) const;
+	void notifyDissapear(SceneObject* sceneObject, OctTreeEntry* entry) const;
 
 	void switchZone(SceneObject* sceneObject, const String& newTerrainName, float newPostionX, float newPositionZ, float newPositionY, uint64 parentID = 0, bool toggleInvisibility = false) const;
 

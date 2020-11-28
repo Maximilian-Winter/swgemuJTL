@@ -41,13 +41,13 @@ public:
 		ManagedReference<Zone*> zone = creature->getZone();
 
 		if (zone != nullptr) {
-			SortedVector<QuadTreeEntry*> closeObjects;
+			SortedVector<OctTreeEntry*> closeObjects;
 			CloseObjectsVector* actualCloseObjects = (CloseObjectsVector*) creature->getCloseObjects();
 
 			if (actualCloseObjects != nullptr) {
 				actualCloseObjects->safeCopyReceiversTo(closeObjects, CloseObjectsVector::CREOTYPE);
 			} else {
-				zone->getInRangeObjects(creature->getWorldPositionX(), creature->getWorldPositionY(), ZoneServer::CLOSEOBJECTRANGE, &closeObjects, true);
+				zone->getInRangeObjects(creature->getWorldPositionX(), creature->getWorldPositionY(), creature->getWorldPositionZ(), ZoneServer::CLOSEOBJECTRANGE, &closeObjects, true);
 			}
 
 			PlayersNearYouMessage* pny = new PlayersNearYouMessage(creature);

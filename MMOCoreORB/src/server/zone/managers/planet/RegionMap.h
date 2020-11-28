@@ -44,13 +44,13 @@ public:
 	 * @param y The y coordinate.
 	 * @return Returns a city region or nullptr if one was not found.
 	 */
-	CityRegion* getRegionAt(float x, float y) {
+	CityRegion* getRegionAt(float x, float y, float z) {
 		rlock();
 
 		for (int i = 0; i < regions.size(); ++i) {
 			CityRegion* cityRegion = regions.get(i);
 
-			if (cityRegion->containsPoint(x, y)) {
+			if (cityRegion->containsPoint(x, y, z)) {
 				runlock();
 				return cityRegion;
 			}

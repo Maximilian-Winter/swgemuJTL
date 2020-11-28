@@ -3087,7 +3087,7 @@ int DirectorManager::getCityRegionAt(lua_State* L) {
 	if (zone != nullptr) {
 		PlanetManager* planetManager = zone->getPlanetManager();
 
-		CityRegion* cityRegion = planetManager->getRegionAt(x, y);
+		CityRegion* cityRegion = planetManager->getRegionAt(x, y, zone->getHeight(x, y));
 
 		if (cityRegion != nullptr) {
 			lua_pushlightuserdata(L, cityRegion);

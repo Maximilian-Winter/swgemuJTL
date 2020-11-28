@@ -29,7 +29,7 @@
 #include "server/zone/managers/name/NameManager.h"
 #include "server/zone/managers/frs/FrsManager.h"
 
-#include "server/zone/QuadTree.h"
+#include "server/zone/OctTree.h"
 
 #include "engine/core/MetricsManager.h"
 #include "engine/service/ServiceThread.h"
@@ -113,8 +113,8 @@ void ServerCore::registerConsoleCommmands() {
 		return SHUTDOWN;
 	});
 
-	addCommand("logQuadTree", [this](const String& arguments) -> CommandResult {
-		QuadTree::setLogging(!QuadTree::doLog());
+	addCommand("logOctTree", [this](const String& arguments) -> CommandResult {
+		OctTree::setLogging(!OctTree::doLog());
 
 		return SUCCESS;
 	});

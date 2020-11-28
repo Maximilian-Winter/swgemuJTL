@@ -9,14 +9,14 @@
 #include "server/zone/objects/area/areashapes/RectangularAreaShape.h"
 #include "server/zone/objects/area/areashapes/RingAreaShape.h"
 
-bool CircularAreaShapeImplementation::containsPoint(float x, float y) const {
+bool CircularAreaShapeImplementation::containsPoint(float x, float y, float z) const {
 	Vector3 position;
-	position.set(x, 0, y);
-
+	position.set(x, z, y);	
 	return (areaCenter.squaredDistanceTo(position) <= radius2);
 }
 
 bool CircularAreaShapeImplementation::containsPoint(const Vector3& point) const {
+
 	return (areaCenter.squaredDistanceTo(point) <= radius2);
 }
 
@@ -25,7 +25,7 @@ Vector3 CircularAreaShapeImplementation::getRandomPosition() const {
 	float angle = System::random(360) * Math::DEG2RAD;
 
 	Vector3 position;
-	position.set(areaCenter.getX() + distance * Math::cos(angle), 0, areaCenter.getY() + distance * Math::sin(angle));
+	position.set(areaCenter.getX() + distance * Math::cos(angle), areaCenter.getZ() + distance, areaCenter.getY() + distance * Math::sin(angle));
 
 	return position;
 }
@@ -38,7 +38,7 @@ Vector3 CircularAreaShapeImplementation::getRandomPosition(const Vector3& origin
 	while (!found && retries-- > 0) {
 		float distance = System::random((int)(maxDistance - minDistance)) + minDistance;
 		float angle = System::random(360) * Math::DEG2RAD;
-		position.set(origin.getX() + distance * Math::cos(angle), 0, origin.getY() + distance * Math::sin(angle));
+		position.set(origin.getX() + distance * Math::cos(angle), origin.getZ() + distance, origin.getY() + distance * Math::sin(angle));
 
 		found = containsPoint(position);
 	}

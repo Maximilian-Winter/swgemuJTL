@@ -263,7 +263,7 @@ int LuaSceneObject::isInRange(lua_State* L) {
 	float y = lua_tonumber(L, -2);
 	float x = lua_tonumber(L, -3);
 
-	bool res = (static_cast<QuadTreeEntry*>(realObject))->isInRange(x, y, range);
+	bool res = (static_cast<OctTreeEntry*>(realObject))->isInRange(x, y, 0, range);
 
 	lua_pushnumber(L, res);
 
@@ -819,8 +819,8 @@ int LuaSceneObject::getPlayersInRange(lua_State *L) {
 
 	lua_newtable(L);
 
-	Reference<SortedVector<ManagedReference<QuadTreeEntry*> >*> playerObjects = new SortedVector<ManagedReference<QuadTreeEntry*> >();
-	thisZone->getInRangePlayers(realObject->getWorldPositionX(), realObject->getWorldPositionY(), range, playerObjects);
+	Reference<SortedVector<ManagedReference<OctTreeEntry*> >*> playerObjects = new SortedVector<ManagedReference<OctTreeEntry*> >();
+	thisZone->getInRangePlayers(realObject->getWorldPositionX(), realObject->getWorldPositionY(),realObject->getWorldPositionZ(), range, playerObjects);
 	int numPlayers = 0;
 
 	for (int i = 0; i < playerObjects->size(); ++i) {

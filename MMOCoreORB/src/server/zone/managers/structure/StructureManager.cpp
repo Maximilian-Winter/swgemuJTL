@@ -292,7 +292,7 @@ int StructureManager::placeStructureFromDeed(CreatureObject* creature, Structure
 	}
 
 	SortedVector<ManagedReference<ActiveArea*> > objects;
-	zone->getInRangeActiveAreas(x, y, &objects, true);
+	zone->getInRangeActiveAreas(x, y, zone->getHeight(x, y), &objects, true);
 
 	ManagedReference<CityRegion*> city;
 
@@ -308,8 +308,8 @@ int StructureManager::placeStructureFromDeed(CreatureObject* creature, Structure
 			break;
 	}
 
-	SortedVector<ManagedReference<QuadTreeEntry*> > inRangeObjects;
-	zone->getInRangeObjects(x, y, 128, &inRangeObjects, true, false);
+	SortedVector<ManagedReference<OctTreeEntry*> > inRangeObjects;
+	zone->getInRangeObjects(x, y, zone->getHeight(x, y), 128, &inRangeObjects, true, false);
 
 	float placingFootprintLength0 = 0, placingFootprintWidth0 = 0, placingFootprintLength1 = 0, placingFootprintWidth1 = 0;
 
@@ -690,11 +690,11 @@ Reference<SceneObject*> StructureManager::getInRangeParkingGarage(SceneObject* o
 	if (zone == nullptr)
 		return nullptr;
 
-	SortedVector<QuadTreeEntry*> closeSceneObjects;
+	SortedVector<OctTreeEntry*> closeSceneObjects;
 	CloseObjectsVector* closeObjectsVector = (CloseObjectsVector*) obj->getCloseObjects();
 
 	if (closeObjectsVector == nullptr) {
-		zone->getInRangeObjects(obj->getPositionX(), obj->getPositionY(), 128, &closeSceneObjects, true, false);
+		zone->getInRangeObjects(obj->getPositionX(), obj->getPositionY(), obj->getPositionZ(), 128, &closeSceneObjects, true, false);
 	} else {
 		closeObjectsVector->safeCopyTo(closeSceneObjects);
 	}

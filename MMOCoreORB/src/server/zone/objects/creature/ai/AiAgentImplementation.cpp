@@ -491,7 +491,7 @@ void AiAgentImplementation::notifyLoadFromDatabase() {
 	}
 }
 
-void AiAgentImplementation::notifyPositionUpdate(QuadTreeEntry* entry) {
+void AiAgentImplementation::notifyPositionUpdate(OctTreeEntry* entry) {
 	CreatureObjectImplementation::notifyPositionUpdate(entry);
 
 	SceneObject* object = static_cast<SceneObject*>(entry);
@@ -782,7 +782,7 @@ void AiAgentImplementation::doAwarenessCheck() {
 	if (vec == nullptr)
 		return;
 
-	SortedVector<QuadTreeEntry*> closeObjects;
+	SortedVector<OctTreeEntry*> closeObjects;
 	vec->safeCopyReceiversTo(closeObjects, CloseObjectsVector::CREOTYPE);
 
 	Behavior* current = behaviors.get(currentBehaviorID);
@@ -1335,7 +1335,7 @@ void AiAgentImplementation::clearCombatState(bool clearDefenders) {
 	sendReactionChat(ReactionManager::CALM);
 }
 
-void AiAgentImplementation::notifyInsert(QuadTreeEntry* entry) {
+void AiAgentImplementation::notifyInsert(OctTreeEntry* entry) {
 	CreatureObjectImplementation::notifyInsert(entry);
 
 	SceneObject* scno = static_cast<SceneObject*>( entry);
@@ -1531,7 +1531,7 @@ void AiAgentImplementation::scheduleDespawn(int timeToDespawn) {
 	addPendingTask("despawn", despawn, timeToDespawn * 1000);
 }
 
-void AiAgentImplementation::notifyDissapear(QuadTreeEntry* entry) {
+void AiAgentImplementation::notifyDissapear(OctTreeEntry* entry) {
 	CreatureObjectImplementation::notifyDissapear(entry);
 
 	SceneObject* scno = static_cast<SceneObject*>( entry);
@@ -2028,21 +2028,21 @@ float AiAgentImplementation::getWorldZ(const Vector3& position) {
 	IntersectionResults intersections;
 
 	if (closeobjects != nullptr) {
-		Vector<QuadTreeEntry*> closeObjects(closeobjects->size(), 10);
+		Vector<OctTreeEntry*> closeObjects(closeobjects->size(), 10);
 
 		closeobjects->safeCopyReceiversTo(closeObjects, CloseObjectsVector::COLLIDABLETYPE);
 		CollisionManager::getWorldFloorCollisions(position.getX(), position.getY(), zone, &intersections, closeObjects);
 
 		ret = zone->getPlanetManager()->findClosestWorldFloor(position.getX(), position.getY(), position.getZ(), getSwimHeight(), &intersections, nullptr);
 	} else {
-		SortedVector<ManagedReference<QuadTreeEntry*> > closeObjects;
+		SortedVector<ManagedReference<OctTreeEntry*> > closeObjects;
 
 #ifdef COV_DEBUG
 		zone->info("Null closeobjects vector in AiAgentImplementation::getWorldZ", true);
 #endif
 
 		Vector3 worldPosition = getWorldPosition();
-		zone->getInRangeObjects(worldPosition.getX(), worldPosition.getY(), 128, &closeObjects, true);
+		zone->getInRangeObjects(worldPosition.getX(), worldPosition.getY(),worldPosition.getZ(), 128, &closeObjects, true);
 
 		CollisionManager::getWorldFloorCollisions(position.getX(), position.getY(), zone, &intersections, closeObjects);
 
@@ -2100,7 +2100,7 @@ bool AiAgentImplementation::generatePatrol(int num, float dist) {
 			}
 		}
 	} else {
-		SortedVector<QuadTreeEntry*> closeObjects;
+		SortedVector<OctTreeEntry*> closeObjects;
 
 		if (closeobjects != nullptr) {
 			closeobjects->safeCopyReceiversTo(closeObjects, CloseObjectsVector::COLLIDABLETYPE);
@@ -2110,7 +2110,7 @@ bool AiAgentImplementation::generatePatrol(int num, float dist) {
 #endif
 
 			Vector3 worldPosition = getWorldPosition();
-			zone->getInRangeObjects(worldPosition.getX(), worldPosition.getY(), 128, &closeObjects, true);
+			zone->getInRangeObjects(worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(), 128, &closeObjects, true);
 		}
 
 		for (int i = 0; i < num; i++) {
@@ -3097,7 +3097,7 @@ void AiAgentImplementation::broadcastInterrupt(int64 msg) {
 	Reference<AiAgent*> aiAgent = asAiAgent();
 
 	Core::getTaskManager()->executeTask([=] () {
-		SortedVector<QuadTreeEntry*> closeAiAgents;
+		SortedVector<OctTreeEntry*> closeAiAgents;
 
 		CloseObjectsVector* closeobjects = (CloseObjectsVector*) aiAgent->getCloseObjects();
 		Zone* zone = aiAgent->getZoneUnsafe();
@@ -3110,7 +3110,7 @@ void AiAgentImplementation::broadcastInterrupt(int64 msg) {
 #ifdef COV_DEBUG
 				aiAgent->info("Null closeobjects vector in AiAgentImplementation::broadcastInterrupt", true);
 #endif
-				zone->getInRangeObjects(aiAgent->getPositionX(), aiAgent->getPositionY(), ZoneServer::CLOSEOBJECTRANGE, &closeAiAgents, true);
+				zone->getInRangeObjects(aiAgent->getPositionX(), aiAgent->getPositionY(), aiAgent->getPositionZ(), ZoneServer::CLOSEOBJECTRANGE, &closeAiAgents, true);
 			} else {
 				closeAiAgents.removeAll(closeobjects->size(), 10);
 				closeobjects->safeCopyReceiversTo(closeAiAgents, CloseObjectsVector::CREOTYPE); //only creos, type 2

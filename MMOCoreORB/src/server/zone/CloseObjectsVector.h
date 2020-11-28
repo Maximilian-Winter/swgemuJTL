@@ -15,23 +15,23 @@
 #include "engine/core/ManagedReference.h"
 namespace server {
  namespace zone {
-class QuadTreeEntry;
+class OctTreeEntry;
 
 class CloseObjectsVector : public Object {
 	mutable ReadWriteLock mutex;
-	SortedVector<Reference<server::zone::QuadTreeEntry*> > objects;
+	SortedVector<Reference<server::zone::OctTreeEntry*> > objects;
 
-	VectorMap<uint32, SortedVector<server::zone::QuadTreeEntry*> > messageReceivers;
+	VectorMap<uint32, SortedVector<server::zone::OctTreeEntry*> > messageReceivers;
 
 	AtomicInteger count;
 
 #ifdef CXX11_COMPILER
-	static_assert(sizeof(server::zone::QuadTreeEntry*) == sizeof(Reference<server::zone::QuadTreeEntry*>), "Reference<> size is not the size of a pointer");
+	static_assert(sizeof(server::zone::OctTreeEntry*) == sizeof(Reference<server::zone::OctTreeEntry*>), "Reference<> size is not the size of a pointer");
 #endif
 
 protected:
-	void dropReceiver(server::zone::QuadTreeEntry* entry);
-	void putReceiver(server::zone::QuadTreeEntry* entry, uint32 receiverTypes);
+	void dropReceiver(server::zone::OctTreeEntry* entry);
+	void putReceiver(server::zone::OctTreeEntry* entry, uint32 receiverTypes);
 public:
 	enum {
 		PLAYERTYPE = 1 << 0,
@@ -43,28 +43,28 @@ public:
 
 	CloseObjectsVector();
 
-	Reference<server::zone::QuadTreeEntry*> remove(int index);
+	Reference<server::zone::OctTreeEntry*> remove(int index);
 
-	bool contains(const Reference<server::zone::QuadTreeEntry*>& o) const;
+	bool contains(const Reference<server::zone::OctTreeEntry*>& o) const;
 
 	void removeAll(int newSize = 10, int newIncrement = 5);
 
-	bool drop(const Reference<server::zone::QuadTreeEntry*>& o);
+	bool drop(const Reference<server::zone::OctTreeEntry*>& o);
 
-	void safeCopyTo(Vector<server::zone::QuadTreeEntry*>& vec) const;
-	void safeCopyTo(Vector<ManagedReference<server::zone::QuadTreeEntry*> >& vec) const;
+	void safeCopyTo(Vector<server::zone::OctTreeEntry*>& vec) const;
+	void safeCopyTo(Vector<ManagedReference<server::zone::OctTreeEntry*> >& vec) const;
 
-	void safeCopyReceiversTo(Vector<server::zone::QuadTreeEntry*>& vec, uint32 receiverType) const;
-	void safeCopyReceiversTo(Vector<ManagedReference<server::zone::QuadTreeEntry*> >& vec, uint32 receiverType) const;
-	void safeAppendReceiversTo(Vector<server::zone::QuadTreeEntry*>& vec, uint32 receiverType) const;
-	void safeAppendReceiversTo(Vector<ManagedReference<server::zone::QuadTreeEntry*> >& vec, uint32 receiverType) const;
+	void safeCopyReceiversTo(Vector<server::zone::OctTreeEntry*>& vec, uint32 receiverType) const;
+	void safeCopyReceiversTo(Vector<ManagedReference<server::zone::OctTreeEntry*> >& vec, uint32 receiverType) const;
+	void safeAppendReceiversTo(Vector<server::zone::OctTreeEntry*>& vec, uint32 receiverType) const;
+	void safeAppendReceiversTo(Vector<ManagedReference<server::zone::OctTreeEntry*> >& vec, uint32 receiverType) const;
 
-	SortedVector<ManagedReference<server::zone::QuadTreeEntry*> > getSafeCopy() const;
+	SortedVector<ManagedReference<server::zone::OctTreeEntry*> > getSafeCopy() const;
 
-	const Reference<server::zone::QuadTreeEntry*>& get(int idx) const;
+	const Reference<server::zone::OctTreeEntry*>& get(int idx) const;
 
-	int put(const Reference<server::zone::QuadTreeEntry*>& o);
-	int put(Reference<server::zone::QuadTreeEntry*>&& o);
+	int put(const Reference<server::zone::OctTreeEntry*>& o);
+	int put(Reference<server::zone::OctTreeEntry*>&& o);
 
 	int size() const NO_THREAD_SAFETY_ANALYSIS {
 		return count;

@@ -25,8 +25,8 @@ class AreaShape extends ManagedObject {
 	 * @param y the y coordinate.
 	 */
 	@preLocked
-	public void setAreaCenter(float x, float y) {
-		areaCenter.set(x, 0, y);
+	public void setAreaCenter(float x, float y, float z) {
+		areaCenter.set(x, z, y);
 	}
 
 	/**
@@ -45,7 +45,7 @@ class AreaShape extends ManagedObject {
 	 * @return true if the coordinate is within the area shape.
 	 */
 	@read
-	public abstract boolean containsPoint(float x, float y) {
+	public abstract boolean containsPoint(float x, float y, float z) {
 		return false;
 	}
 

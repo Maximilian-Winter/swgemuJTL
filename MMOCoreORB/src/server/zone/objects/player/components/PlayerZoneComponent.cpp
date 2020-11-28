@@ -23,7 +23,7 @@ void PlayerZoneComponent::notifyInsertToZone(SceneObject* sceneObject, Zone* new
 	ZoneComponent::notifyInsertToZone(sceneObject, newZone);
 }
 
-void PlayerZoneComponent::notifyInsert(SceneObject* sceneObject, QuadTreeEntry* entry) const {
+void PlayerZoneComponent::notifyInsert(SceneObject* sceneObject, OctTreeEntry* entry) const {
 	SceneObject* scno = static_cast<SceneObject*>( entry);
 
 	if (scno == sceneObject)
@@ -45,7 +45,7 @@ void PlayerZoneComponent::notifyInsert(SceneObject* sceneObject, QuadTreeEntry* 
 	scno->sendTo(sceneObject, true, false);
 }
 
-void PlayerZoneComponent::notifyDissapear(SceneObject* sceneObject, QuadTreeEntry* entry) const {
+void PlayerZoneComponent::notifyDissapear(SceneObject* sceneObject, OctTreeEntry* entry) const {
 	SceneObject* scno = static_cast<SceneObject*>( entry);
 
 	if (scno == sceneObject)

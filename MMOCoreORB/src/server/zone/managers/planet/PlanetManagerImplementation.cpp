@@ -742,7 +742,7 @@ bool PlanetManagerImplementation::noInterferingObjects(CreatureObject* creature,
 	if (vec == nullptr)
 		return true;
 
-	SortedVector<QuadTreeEntry*> closeObjects;
+	SortedVector<OctTreeEntry*> closeObjects;
 	vec->safeCopyTo(closeObjects);
 
 	for (int j = 0; j < closeObjects.size(); j++) {
@@ -866,7 +866,7 @@ void PlanetManagerImplementation::loadClientRegions(LuaObject* outposts) {
 
 		Locker locker(cityRegion);
 
-		ManagedReference<Region*> region = cityRegion->addRegion(x, y, radius, false);
+		ManagedReference<Region*> region = cityRegion->addRegion(x, y, zone->getHeight(x, y), radius, false);
 
 		locker.release();
 
@@ -912,7 +912,7 @@ void PlanetManagerImplementation::loadClientRegions(LuaObject* outposts) {
 		Locker shapeLocker(areaShape);
 
 		areaShape->setRadius(radius * 2);
-		areaShape->setAreaCenter(x, y);
+		areaShape->setAreaCenter(x, y, zone->getHeight(x, y));
 		noBuild->setAreaShape(areaShape);
 		noBuild->setRadius(radius * 2);
 		noBuild->setNoBuildArea(true);
@@ -1022,11 +1022,11 @@ bool PlanetManagerImplementation::isInRangeWithPoi(float x, float y, float range
 }
 
 bool PlanetManagerImplementation::isInObjectsNoBuildZone(float x, float y, float extraMargin, bool checkFootprint) {
-	SortedVector<QuadTreeEntry*> closeObjects;
+	SortedVector<OctTreeEntry*> closeObjects;
 
 	Vector3 targetPos(x, y, zone->getHeight(x, y));
 
-	zone->getInRangeObjects(x, y, 512, &closeObjects, true, false);
+	zone->getInRangeObjects(x, y, zone->getHeight(x, y), 512, &closeObjects, true, false);
 
 	for (int i = 0; i < closeObjects.size(); ++i) {
 		SceneObject* obj = static_cast<SceneObject*>(closeObjects.get(i));
@@ -1064,19 +1064,21 @@ bool PlanetManagerImplementation::isSpawningPermittedAt(float x, float y, float 
 	SortedVector<ActiveArea*> activeAreas;
 
 	Vector3 targetPos(x, y, 0);
+	targetPos.setZ(zone->getHeight(x, y));
 
 	if (!zone->isWithinBoundaries(targetPos))
 		return false;
 
-	targetPos.setZ(zone->getHeight(x, y));
+	
 
-	zone->getInRangeActiveAreas(x, y, &activeAreas, true);
-	zone->getInRangeActiveAreas(x, y, margin + 64.f, &activeAreas, true);
+	zone->getInRangeActiveAreas(x, y, zone->getHeight(x, y), &activeAreas, true);
+	zone->getInRangeActiveAreas(x, y, zone->getHeight(x, y), margin + 64.f, &activeAreas, true);
 
 	for (int i = 0; i < activeAreas.size(); ++i) {
 		ActiveArea* area = activeAreas.get(i);
 
-		if (area->isRegion() || area->isMunicipalZone() || area->isNoSpawnArea()) {
+		if (area->isRegion() || area->isMunicipalZone() || area->isNoSpawnArea()) 
+		{	
 			return false;
 		}
 	}
@@ -1090,10 +1092,15 @@ bool PlanetManagerImplementation::isSpawningPermittedAt(float x, float y, float 
 	}
 
 	if (isInRangeWithPoi(x, y, 150))
+	{
 		return false;
+	}
+	
 
 	if (terrainManager->getHighestHeightDifference(x - 10, y - 10, x + 10, y + 10) > 15.0)
+	{
 		return false;
+	}
 
 	return true;
 }
@@ -1108,7 +1115,7 @@ bool PlanetManagerImplementation::isBuildingPermittedAt(float x, float y, SceneO
 
 	//targetPos.setZ(zone->getHeight(x, y)); not needed
 
-	zone->getInRangeActiveAreas(x, y, &activeAreas, true);
+	zone->getInRangeActiveAreas(x, y, zone->getHeight(x, y), &activeAreas, true);
 
 	for (int i = 0; i < activeAreas.size(); ++i) {
 		ActiveArea* area = activeAreas.get(i);
@@ -1137,7 +1144,7 @@ bool PlanetManagerImplementation::isCampingPermittedAt(float x, float y, float m
 
 	Vector3 targetPos(x, y, zone->getHeight(x, y));
 
-	zone->getInRangeActiveAreas(x, y, &activeAreas, true);
+	zone->getInRangeActiveAreas(x, y,zone->getHeight(x, y), &activeAreas, true);
 
 	for (int i = 0; i < activeAreas.size(); ++i) {
 		ActiveArea* area = activeAreas.get(i);
@@ -1164,11 +1171,11 @@ bool PlanetManagerImplementation::isCampingPermittedAt(float x, float y, float m
 }
 
 Reference<SceneObject*> PlanetManagerImplementation::findObjectTooCloseToDecoration(float x, float y, float margin) {
-	SortedVector<ManagedReference<QuadTreeEntry* > > closeObjects;
+	SortedVector<ManagedReference<OctTreeEntry* > > closeObjects;
 
 	Vector3 targetPos(x, y,0);
 
-	zone->getInRangeObjects(x, y, 256, &closeObjects, true, false);
+	zone->getInRangeObjects(x, y,zone->getHeight(x, y), 256, &closeObjects, true, false);
 
 	for (int i = 0; i < closeObjects.size(); ++i) {
 

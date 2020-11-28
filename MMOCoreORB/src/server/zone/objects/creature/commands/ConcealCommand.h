@@ -69,11 +69,11 @@ public:
 		}
 
 		/// Check if anything is attackable in range
-		SortedVector<QuadTreeEntry*> objects(512, 512);
+		SortedVector<OctTreeEntry*> objects(512, 512);
 		CloseObjectsVector* closeObjectsVector = (CloseObjectsVector*) creature->getCloseObjects();
 
 		if (closeObjectsVector == nullptr) {
-			creature->getZone()->getInRangeObjects(creature->getPositionX(), creature->getPositionY(), 32, &objects, true);
+			creature->getZone()->getInRangeObjects(creature->getPositionX(), creature->getPositionY(), creature->getPositionZ(), 32, &objects, true);
 		} else {
 			closeObjectsVector->safeCopyReceiversTo(objects, CloseObjectsVector::CREOTYPE);
 		}

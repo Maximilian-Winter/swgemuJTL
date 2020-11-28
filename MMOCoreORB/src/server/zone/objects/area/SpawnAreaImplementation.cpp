@@ -50,7 +50,7 @@ Vector3 SpawnAreaImplementation::getRandomPosition(SceneObject* player) {
 		for (int i = 0; i < noSpawnAreas.size(); ++i) {
 			auto noSpawnArea = noSpawnAreas.get(i).get();
 
-			if (noSpawnArea != nullptr && noSpawnArea->containsPoint(position.getX(), position.getY())) {
+			if (noSpawnArea != nullptr && noSpawnArea->containsPoint(position.getX(), position.getY(), position.getZ())) {
 				positionFound = false;
 				break;
 			}

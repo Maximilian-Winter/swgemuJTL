@@ -156,8 +156,8 @@ void NavMeshManager::startJob(Reference<NavMeshJob*> job) {
 	    << " on planet: " << zone->getZoneName() << " at: "
 	    << area->getPosition().toString();
 
-    SortedVector <ManagedReference<QuadTreeEntry *>> closeObjects;
-    zone->getInRangeSolidObjects(center.getX(), center.getZ(), range, &closeObjects, true);
+    SortedVector <ManagedReference<OctTreeEntry *>> closeObjects;
+    zone->getInRangeSolidObjects(center.getX(), center.getZ(), center.getY(), range, &closeObjects, true);
 
     Vector <Reference<MeshData *>> meshData;
 

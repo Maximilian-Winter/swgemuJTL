@@ -3,9 +3,9 @@
 #include "server/zone/objects/area/areashapes/RectangularAreaShape.h"
 #include "server/zone/objects/area/areashapes/CircularAreaShape.h"
 
-bool RingAreaShapeImplementation::containsPoint(float x, float y) const {
+bool RingAreaShapeImplementation::containsPoint(float x, float y, float z) const {
 	Vector3 position;
-	position.set(x, 0, y);
+	position.set(x, z, y);
 
 	return ((areaCenter.squaredDistanceTo(position) <= outerRadius2) && (areaCenter.squaredDistanceTo(position) >= innerRadius2));
 }

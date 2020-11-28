@@ -427,8 +427,8 @@ bool GCWManagerImplementation::hasTooManyBasesNearby(int x, int y) {
 	if (zone == nullptr)
 		return true;
 
-	SortedVector<QuadTreeEntry*> inRangeObjects;
-	zone->getInRangeObjects(x, y, 600, &inRangeObjects, true, false);
+	SortedVector<OctTreeEntry*> inRangeObjects;
+	zone->getInRangeObjects(x, y, zone->getHeight(x,y), 600, &inRangeObjects, true, false);
 	int count = 0;
 
 	for (int i = 0; i < inRangeObjects.size(); ++i) {
@@ -1677,12 +1677,12 @@ void GCWManagerImplementation::broadcastBuilding(BuildingObject* building, Strin
 	if (zone == nullptr)
 		return;
 
-	SortedVector<QuadTreeEntry*> closeObjects;
+	SortedVector<OctTreeEntry*> closeObjects;
 	if (building->getCloseObjects() == nullptr) {
 #ifdef COV_DEBUG
 		building->info("Null closeobjects vector in GCWManagerImplementation::broadcastBuilding", true);
 #endif
-		zone->getInRangeObjects(building->getPositionX(), building->getPositionY(), range, &closeObjects, true);
+		zone->getInRangeObjects(building->getPositionX(), building->getPositionY(), building->getPositionZ(), range, &closeObjects, true);
 	} else {
 		CloseObjectsVector* closeVector = (CloseObjectsVector*)building->getCloseObjects();
 		closeVector->safeCopyReceiversTo(closeObjects, CloseObjectsVector::PLAYERTYPE);
@@ -2625,9 +2625,9 @@ void GCWManagerImplementation::performCheckWildContrabandScanTask() {
 
 	Vector3 hitPoint = zone->getPlanetManager()->getRandomSpawnPoint();
 
-	Reference<SortedVector<ManagedReference<QuadTreeEntry*>>*> closePlayers = new SortedVector<ManagedReference<QuadTreeEntry*>>();
+	Reference<SortedVector<ManagedReference<OctTreeEntry*>>*> closePlayers = new SortedVector<ManagedReference<OctTreeEntry*>>();
 
-	zone->getInRangePlayers(hitPoint.getX(), hitPoint.getY(), crackdownPerformanceWildScanPlayerFindRadius, closePlayers);
+	zone->getInRangePlayers(hitPoint.getX(), hitPoint.getY(), hitPoint.getZ(), crackdownPerformanceWildScanPlayerFindRadius, closePlayers);
 
 	if (closePlayers->size() > 0) {
 		int playerIndex = int(System::random(closePlayers->size() - 1));

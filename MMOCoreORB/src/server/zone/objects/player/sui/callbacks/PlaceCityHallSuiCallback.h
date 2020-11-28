@@ -102,7 +102,7 @@ public:
 		int result = StructureManager::instance()->placeStructureFromDeed(creature, deed.get(), x, y, angle);
 
 		if (result == 0) {
-			cityManager->createCity(creature, cityName, x, y);
+			cityManager->createCity(creature, cityName, x, y, zone->getHeight(x, y));
 		}
 	}
 };

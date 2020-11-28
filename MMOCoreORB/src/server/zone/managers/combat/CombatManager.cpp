@@ -2221,7 +2221,7 @@ void CombatManager::broadcastCombatSpam(TangibleObject* attacker, TangibleObject
 		return;
 
 	CloseObjectsVector* vec = (CloseObjectsVector*) attacker->getCloseObjects();
-	SortedVector<QuadTreeEntry*> closeObjects;
+	SortedVector<OctTreeEntry*> closeObjects;
 
 	if (vec != nullptr) {
 		closeObjects.removeAll(vec->size(), 10);
@@ -2230,7 +2230,7 @@ void CombatManager::broadcastCombatSpam(TangibleObject* attacker, TangibleObject
 #ifdef COV_DEBUG
 		info("Null closeobjects vector in CombatManager::broadcastCombatSpam", true);
 #endif
-		zone->getInRangeObjects(attacker->getWorldPositionX(), attacker->getWorldPositionY(), COMBAT_SPAM_RANGE, &closeObjects, true);
+		zone->getInRangeObjects(attacker->getWorldPositionX(), attacker->getWorldPositionY(),attacker->getWorldPositionZ(), COMBAT_SPAM_RANGE, &closeObjects, true);
 	}
 
 	for (int i = 0; i < closeObjects.size(); ++i) {
@@ -2634,7 +2634,7 @@ Reference<SortedVector<ManagedReference<TangibleObject*> >* > CombatManager::get
 
 		CloseObjectsVector* vec =  (CloseObjectsVector*)attacker->getCloseObjects();
 
-		SortedVector<QuadTreeEntry*> closeObjects;
+		SortedVector<OctTreeEntry*> closeObjects;
 
 		if (vec != nullptr) {
 			closeObjects.removeAll(vec->size(), 10);
@@ -2643,7 +2643,7 @@ Reference<SortedVector<ManagedReference<TangibleObject*> >* > CombatManager::get
 #ifdef COV_DEBUG
 			attacker->info("Null closeobjects vector in CombatManager::getAreaTargets", true);
 #endif
-			zone->getInRangeObjects(attacker->getWorldPositionX(), attacker->getWorldPositionY(), 128, &closeObjects, true);
+			zone->getInRangeObjects(attacker->getWorldPositionX(), attacker->getWorldPositionY(), attacker->getWorldPositionZ(), 128, &closeObjects, true);
 		}
 
 		for (int i = 0; i < closeObjects.size(); ++i) {

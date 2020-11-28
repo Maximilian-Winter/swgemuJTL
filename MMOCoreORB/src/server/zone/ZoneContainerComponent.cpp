@@ -12,6 +12,8 @@
 #include "server/zone/managers/planet/PlanetManager.h"
 #include "templates/building/SharedBuildingObjectTemplate.h"
 #include "server/zone/objects/intangible/TheaterObject.h"
+#include "server/zone/objects/area/areashapes/RectangularAreaShape.h"
+#include "server/zone/objects/area/areashapes/RingAreaShape.h"
 
 bool ZoneContainerComponent::insertActiveArea(Zone* newZone, ActiveArea* activeArea) const {
 	if (newZone == nullptr)
@@ -26,7 +28,7 @@ bool ZoneContainerComponent::insertActiveArea(Zone* newZone, ActiveArea* activeA
 
 	Locker zoneLocker(newZone);
 
-	if (activeArea->isInQuadTree() && newZone != zone) {
+	if (activeArea->isInOctTree() && newZone != zone) {
 		activeArea->error("trying to insert to zone an object that is already in a different quadtree");
 
 		activeArea->destroyObjectFromWorld(true);
@@ -36,17 +38,40 @@ bool ZoneContainerComponent::insertActiveArea(Zone* newZone, ActiveArea* activeA
 
 	activeArea->setZone(newZone);
 
-	QuadTree* regionTree = newZone->getRegionTree();
+	const auto& shape = activeArea->getAreaShape();
 
+	if (shape) {
+		Vector3 areaCenter = shape->getAreaCenter();
+		activeArea->setPosition(areaCenter.getX(), areaCenter.getZ(), areaCenter.getY());
+
+		if (shape->getRadius() == -1) {
+			activeArea->setDimensions(0, 0, -1);
+		}
+		else
+		if (shape->isCircularAreaShape()) {
+				String areaName = activeArea->getDisplayedName();
+				activeArea->setDimensions(activeArea->getRadius(), 0, 1);
+		} else
+		if (shape->isRectangularAreaShape()) {
+			const auto& rect = static_cast<RectangularAreaShape*>(shape);
+			activeArea->setDimensions(rect->getHeight(), rect->getWidth(), 2);
+		} else
+		if (shape->isRingAreaShape()) {
+			const auto& ring = static_cast<RingAreaShape*>(shape);
+			activeArea->setDimensions(ring->getOuterRadius(), ring->getInnerRadius(), 3);
+		}
+	}
+
+	const auto& regionTree = newZone->getRegionTree();
 	regionTree->insert(activeArea);
-
+	
 	//regionTree->inRange(activeArea, 512);
 
 	// lets update area to the in range players
-	SortedVector<QuadTreeEntry*> objects;
+	SortedVector<OctTreeEntry*> objects;
 	float range = activeArea->getRadius() + 64;
 
-	newZone->getInRangeObjects(activeArea->getPositionX(), activeArea->getPositionY(), range, &objects, false);
+	newZone->getInRangeObjects(activeArea->getPositionX(), activeArea->getPositionY(), activeArea->getPositionZ(), range, &objects, false);
 
 	for (int i = 0; i < objects.size(); ++i) {
 		SceneObject* object = static_cast<SceneObject*>(objects.get(i));
@@ -57,7 +82,7 @@ bool ZoneContainerComponent::insertActiveArea(Zone* newZone, ActiveArea* activeA
 			if (object->isStaticObjectClass()) {
 				Vector3 worldPos = object->getWorldPosition();
 
-				if (activeArea->containsPoint(worldPos.getX(), worldPos.getY())) {
+				if (activeArea->containsPoint(worldPos.getX(), worldPos.getY(), worldPos.getZ())) {
 					activeArea->enqueueEnterEvent(object);
 				}
 			}
@@ -69,7 +94,7 @@ bool ZoneContainerComponent::insertActiveArea(Zone* newZone, ActiveArea* activeA
 
 		Vector3 worldPos = object->getWorldPosition();
 
-		if (!tano->hasActiveArea(activeArea) && activeArea->containsPoint(worldPos.getX(), worldPos.getY())) {
+		if (!tano->hasActiveArea(activeArea) && activeArea->containsPoint(worldPos.getX(), worldPos.getY(), worldPos.getZ())) {
 			tano->addActiveArea(activeArea);
 			activeArea->enqueueEnterEvent(object);
 		}
@@ -92,20 +117,20 @@ bool ZoneContainerComponent::removeActiveArea(Zone* zone, ActiveArea* activeArea
 
 	ManagedReference<SceneObject*> thisLocker = activeArea;
 
-	if (!activeArea->isInQuadTree())
+	if (!activeArea->isInOctTree())
 		return false;
 
 	Locker zoneLocker(zone);
 
-	QuadTree* regionTree = zone->getRegionTree();
+	OctTree* regionTree = zone->getRegionTree();
 
 	regionTree->remove(activeArea);
 
 	// lets remove the in range active areas of players
-	SortedVector<QuadTreeEntry*> objects;
+	SortedVector<OctTreeEntry*> objects;
 	float range = activeArea->getRadius() + 64;
 
-	zone->getInRangeObjects(activeArea->getPositionX(), activeArea->getPositionY(), range, &objects, false);
+	zone->getInRangeObjects(activeArea->getPositionX(), activeArea->getPositionY(), activeArea->getPositionZ(), range, &objects, false);
 
 	zone->dropSceneObject(activeArea);
 
@@ -120,7 +145,7 @@ bool ZoneContainerComponent::removeActiveArea(Zone* zone, ActiveArea* activeArea
 			if (object->isStaticObjectClass()) {
 				Vector3 worldPos = object->getWorldPosition();
 
-				if (activeArea->containsPoint(worldPos.getX(), worldPos.getY())) {
+				if (activeArea->containsPoint(worldPos.getX(), worldPos.getY(), worldPos.getZ())) {
 					activeArea->enqueueExitEvent(object);
 				}
 			}
@@ -156,7 +181,7 @@ bool ZoneContainerComponent::transferObject(SceneObject* sceneObject, SceneObjec
 
 	Locker zoneLocker(newZone);
 
-	if (object->isInQuadTree() && newZone != zone) {
+	if (object->isInOctTree() && newZone != zone) {
 		object->error("trying to insert to zone an object that is already in a different quadtree");
 
 		object->destroyObjectFromWorld(true);
@@ -218,7 +243,7 @@ bool ZoneContainerComponent::transferObject(SceneObject* sceneObject, SceneObjec
 		Vector3 worldPos = object->getWorldPosition();
 
 		SortedVector<ManagedReference<NavArea*> > meshes;
-		zone->getInRangeNavMeshes(worldPos.getX(), worldPos.getY(), &meshes, false);
+		zone->getInRangeNavMeshes(worldPos.getX(), worldPos.getY(),worldPos.getZ(), &meshes, false);
 
 		for(auto& mesh : meshes) {
 			if (mesh->containsPoint(worldPos.getX(), worldPos.getY())) {
@@ -281,19 +306,19 @@ bool ZoneContainerComponent::removeObject(SceneObject* sceneObject, SceneObject*
 		auto closeObjects = object->getCloseObjects();
 
 		if (closeObjects != nullptr) {
-			SortedVector<ManagedReference<QuadTreeEntry*> > closeSceneObjects;
+			SortedVector<ManagedReference<OctTreeEntry*> > closeSceneObjects;
 
 			ZoneComponent::removeAllObjectsFromCOV(closeObjects, closeSceneObjects, sceneObject, object);
 		} else {
 #ifdef COV_DEBUG
 			object->info("Null closeobjects vector in ZoneContainerComponent::removeObject", true);
 #endif
-			SortedVector<ManagedReference<QuadTreeEntry*> > closeSceneObjects;
+			SortedVector<ManagedReference<OctTreeEntry*> > closeSceneObjects;
 
-			zone->getInRangeObjects(object->getPositionX(), object->getPositionY(), 512, &closeSceneObjects, false);
+			zone->getInRangeObjects(object->getPositionX(), object->getPositionY(), object->getPositionZ(), 512, &closeSceneObjects, false);
 
 			for (int i = 0; i < closeSceneObjects.size(); ++i) {
-				QuadTreeEntry* obj = closeSceneObjects.get(i);
+				OctTreeEntry* obj = closeSceneObjects.get(i);
 
 				if (obj != nullptr && obj != object && obj->getCloseObjects() != nullptr)
 					obj->removeInRangeObject(object);
@@ -332,7 +357,7 @@ bool ZoneContainerComponent::removeObject(SceneObject* sceneObject, SceneObject*
 			}
 		} else if (object->isStaticObjectClass()) {
 			SortedVector<ManagedReference<NavArea*> > meshes;
-			oldZone->getInRangeNavMeshes(object->getPositionX(), object->getPositionY(), &meshes, true);
+			oldZone->getInRangeNavMeshes(object->getPositionX(), object->getPositionY(), object->getPositionZ(), &meshes, true);
 
 			for(auto& mesh : meshes) {
 				if (mesh->containsPoint(object->getPositionX(), object->getPositionY())) {
@@ -350,7 +375,7 @@ bool ZoneContainerComponent::removeObject(SceneObject* sceneObject, SceneObject*
 			if (outdoorChild == nullptr)
 				continue;
 
-			if (outdoorChild->isInQuadTree()) {
+			if (outdoorChild->isInOctTree()) {
 				Locker locker(outdoorChild);
 
 				outdoorChild->destroyObjectFromWorld(true);

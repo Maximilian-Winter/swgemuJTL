@@ -4,8 +4,8 @@
 
 package server.zone;
 
-import server.zone.QuadTree;
-import server.zone.QuadTreeEntry;
+import server.zone.OctTree;
+import server.zone.OctTreeEntry;
 include server.chat.room.ChatRoom;
 
 import system.lang.Time;
@@ -24,7 +24,7 @@ import system.util.SynchronizedSortedVector;
 include server.zone.managers.object.ObjectMap;
 include server.zone.managers.planet.MapLocationTable;
 include engine.util.u3d.Vector3;
-include server.zone.QuadTreeReference;
+include server.zone.OctTreeReference;
 
 import server.zone.objects.tangible.TangibleObject;
 import server.zone.objects.pathfinding.NavArea;
@@ -54,10 +54,10 @@ class Zone extends SceneObject {
 	private transient ZoneServer server;
 
 	@dereferenced
-	private QuadTreeReference regionTree;
+	private OctTreeReference regionTree;
 
 	@dereferenced
-	private QuadTreeReference quadTree;
+	private OctTreeReference octTree;
 
 	@dereferenced
 	private transient Time galacticTime;
@@ -82,52 +82,52 @@ class Zone extends SceneObject {
 	public native void initializePrivateData();
 
 	@local
-	public QuadTree getRegionTree() {
+	public OctTree getRegionTree() {
 		return regionTree.get();
 	}
 
 	@local
-	public native int getInRangeSolidObjects(float x, float y, float range, SortedVector<QuadTreeEntry> objects, boolean readLockZone);
+	public native int getInRangeSolidObjects(float x, float y, float z, float range, SortedVector<OctTreeEntry> objects, boolean readLockZone);
 
 	@local
-	public native int getInRangeObjects(float x, float y, float range, SortedVector<QuadTreeEntry> objects, boolean readLockZone, boolean includeBuildingObjects = true);
+	public native int getInRangeObjects(float x, float y, float z, float range, SortedVector<OctTreeEntry> objects, boolean readLockZone, boolean includeBuildingObjects = true);
 
 	@local
-	public native int getInRangeObjects(float x, float y, float range, InRangeObjectsVector objects, boolean readLockZone, boolean includeBuildingObjects = true);
+	public native int getInRangeObjects(float x, float y, float z, float range, InRangeObjectsVector objects, boolean readLockZone, boolean includeBuildingObjects = true);
 
 	@local
-	public native int getInRangePlayers(float x, float y, float range, SortedVector<QuadTreeEntry> objects);
+	public native int getInRangePlayers(float x, float y, float z, float range, SortedVector<OctTreeEntry> objects);
 
 	public native void createContainerComponent();
 
 	@local
-	public native int getInRangeActiveAreas(float x, float y, SortedVector<ActiveArea> objects, boolean readLockZone);
+	public native int getInRangeActiveAreas(float x, float y, float z, SortedVector<ActiveArea> objects, boolean readLockZone);
 	@local
-	public native int getInRangeActiveAreas(float x, float y, ActiveAreasVector objects, boolean readLockZone);
+	public native int getInRangeActiveAreas(float x, float y, float z, ActiveAreasVector objects, boolean readLockZone);
 	@local
-	public native int getInRangeNavMeshes(float x, float y, SortedVector<NavArea> objects, boolean readLockZone);
+	public native int getInRangeNavMeshes(float x, float y, float z, SortedVector<NavArea> objects, boolean readLockZone);
 
 	/* gets active areas whose center is within the given range */
 	@local
-	public native int getInRangeActiveAreas(float x, float y, float range, SortedVector<ActiveArea> objects, boolean readLockZone);
+	public native int getInRangeActiveAreas(float x, float y, float z, float range, SortedVector<ActiveArea> objects, boolean readLockZone);
 	@local
-	public native int getInRangeActiveAreas(float x, float y, float range, ActiveAreasVector objects, boolean readLockZone);
+	public native int getInRangeActiveAreas(float x, float y, float z, float range, ActiveAreasVector objects, boolean readLockZone);
 
 	@local
 	@dereferenced
 	public native SortedVector<SceneObject> getPlanetaryObjectList(final string mapObjectLocationType);
 
 	@local
-	public native void insert(QuadTreeEntry entry);
+	public native void insert(OctTreeEntry entry);
 
 	@local
-	public native void remove(QuadTreeEntry entry);
+	public native void remove(OctTreeEntry entry);
 
 	@local
-	public native void update(QuadTreeEntry entry);
+	public native void update(OctTreeEntry entry);
 
 	@local
-	public native void inRange(QuadTreeEntry entry, float range);
+	public native void inRange(OctTreeEntry entry, float range);
 
 	public native void updateActiveAreas(TangibleObject tano);
 
@@ -217,6 +217,12 @@ class Zone extends SceneObject {
 
 	@dirty
 	public native float getMaxY();
+
+	@dirty
+	public native float getMinZ();
+
+	@dirty
+	public native float getMaxZ();
 
 	@dirty
 	@local

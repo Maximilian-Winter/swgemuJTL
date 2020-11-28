@@ -148,8 +148,8 @@ int CampKitMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject,
 		/// Check if player is elevated, on a building or porch
 
 		/// Check camps/lairs nearby
-		SortedVector<ManagedReference<QuadTreeEntry* > > nearbyObjects;
-		zone->getInRangeObjects(player->getPositionX(), player->getPositionY(),
+		SortedVector<ManagedReference<OctTreeEntry* > > nearbyObjects;
+		zone->getInRangeObjects(player->getPositionX(), player->getPositionY(),  player->getPositionZ(),
 				512, &nearbyObjects, true, false);
 
 		for(int i = 0; i < nearbyObjects.size(); ++i) {

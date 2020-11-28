@@ -1,0 +1,371 @@
+/*
+Copyright (C) 2007 <SWGEmu>. All rights reserved.
+Distribution of this file for usage outside of Core3 is prohibited.
+*/
+
+package server.zone;
+
+include system.lang.ref.Reference;
+include system.lang.Math;
+include system.util.SortedVector;
+
+include server.zone.CloseObjectsVector;
+
+import engine.core.ManagedObject;
+
+import engine.util.Observable;
+
+import engine.util.u3d.Vector3;
+include engine.util.u3d.Coordinate;
+import server.zone.OctTreeNode;
+
+@json
+class OctTreeEntry extends Observable {
+	@dereferenced
+	protected Coordinate coordinates;
+
+	transient protected OctTreeNode node;
+
+	protected boolean bounding;
+
+	@weakReference
+	protected OctTreeEntry parent;
+
+	transient protected CloseObjectsVector closeobjects;
+
+	protected float radius;
+	protected float radiusX;
+	protected int areaType;
+
+	public native OctTreeEntry(OctTreeNode n = null);
+
+	protected transient int receiverFlags;
+
+	@dirty
+	public void addInRangeObject(OctTreeEntry obj, boolean doNotifyUpdate = true) {
+		//System::out << "adding in range object:" << obj << "\n";
+
+		if (closeobjects.put(obj) != -1) {
+			notifyInsert(obj);
+		} else if (doNotifyUpdate) {
+			notifyPositionUpdate(obj);
+		}
+	}
+
+	/*@read
+	public OctTreeEntry getInRangeObject(int index) {
+		return closeobjects.get(index);
+	}*/
+
+	@dirty
+	public void removeInRangeObject(OctTreeEntry obj, boolean notifyDisappear = true) {
+		//System::out << "droping in range object:" << obj << "\n";
+
+		if (closeobjects.drop(obj) && notifyDisappear) {
+			notifyDissapear(obj);
+		}
+
+		/*else {
+			OctTreeEntry* obj2 = NULL;
+			obj2->getPositionX();
+
+			System::out << hex << "[0x" << obj->objectID << "] was not found in close objects for [0x"
+				 << objectID << dec << "]\n";
+		}*/
+	}
+
+	@dirty
+	public void removeInRangeObject(int index) {
+		//System::out << "droping in range object with index:" << index << "\n";
+
+		closeobjects.remove(index);
+	}
+
+	@dirty
+	public void removeInRangeObjects() {
+		//System::out << "droping  all in range objects\n";
+
+		/*for (int i = 0; i < closeobjects.size(); ++i) {
+			closeobjects.get(i).notifyRemovedFromCloseObjects();
+		}*/
+
+		closeobjects.removeAll();
+	}
+
+	/*@read
+	public boolean containsInRangeObject(OctTreeEntry obj) {
+		return closeobjects.contains(obj);
+	}*/
+
+	@dirty
+	public abstract boolean isInRange(OctTreeEntry obj, float range) {
+		return isInRange(obj.getPositionX(), obj.getPositionY(), obj.getPositionZ(), range);
+	}
+
+	@read
+	public native abstract float getOutOfRangeDistance();
+
+	@dirty
+	public abstract boolean isInRange(float x, float y, float z, float range) {
+
+		if (!areaType) {
+			float rangesq = range * range;
+
+			float deltaX = x - coordinates.getPositionX();
+			float deltaY = y - coordinates.getPositionY();
+			float deltaZ = z - coordinates.getPositionZ();
+
+			if (deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ <= rangesq)
+				return true;
+			else
+				return false;
+		}
+
+		return containsPoint(x, y, z, range);	
+	}
+
+	@read
+	public float getDistanceTo(OctTreeEntry obj) {
+		float x = obj.getPositionX();
+		float y = obj.getPositionY();
+		float z = obj.getPositionZ();
+
+		float deltaX = x - coordinates.getPositionX();
+		float deltaY = y - coordinates.getPositionY();
+		float deltaZ = z - coordinates.getPositionZ();
+
+		return Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+	}
+
+	@read
+	public boolean isInQuadTree() {
+		return node;
+	}
+	
+	@local
+	@dirty
+	public CloseObjectsVector getCloseObjects() {
+		return closeobjects;
+	}
+
+	@dirty
+	@weakReference
+	public OctTreeEntry getParent() {
+		return parent;
+	}
+
+	@dirty
+	public native OctTreeEntry getParentUnsafe();
+
+	@dirty
+	public native OctTreeEntry getRootParentUnsafe();
+
+	@read
+	public abstract native boolean containsPoint(float x, float y, float z);
+
+	@read
+	public abstract native boolean containsPoint(float x, float y, float z, float range);
+
+	@read
+	@local
+	private abstract native boolean globalContainsPoint(float x, float y, float z);	
+
+	@read
+	@local
+	private abstract native boolean circleContainsPoint(float x, float y, float z, float range);
+
+	@read
+	@local
+	private abstract native boolean rectangleContainsPoint(float x, float y, float z, float range);
+
+	@read
+	@local
+	private abstract native boolean ringContainsPoint(float x, float y, float z, float range);
+
+	@dirty
+	public native OctTreeEntry getRootParent();
+
+	@read
+	@local
+	public native boolean isInBottomSWArea(OctTreeNode node);
+	@read
+	@local
+	public native boolean isInTopSWArea(OctTreeNode node);
+
+	@read
+	@local
+	public native boolean isInBottomSEArea(OctTreeNode node);
+
+	@read
+	@local
+	public native boolean isInTopSEArea(OctTreeNode node);
+
+	@read
+	@local
+	public native boolean isInBottomNWArea(OctTreeNode node);
+
+	@read
+	@local
+	public native boolean isInTopNWArea(OctTreeNode node);
+
+	@read
+	@local
+	public native boolean isInBottomArea(OctTreeNode node);
+
+	@read
+	@local
+	public native boolean isInTopArea(OctTreeNode node);
+
+	@dirty
+	public abstract void notifyInsert(OctTreeEntry obj) {
+	}
+
+	@dirty
+	public abstract void notifyPositionUpdate(OctTreeEntry obj) {
+	}
+
+	@dirty
+	public abstract void notifyDissapear(OctTreeEntry obj) {
+	}
+
+	@read
+	public float getPositionX() {
+		return coordinates.getPositionX();
+	}
+
+	@read
+	public float getPositionZ() {
+		return coordinates.getPositionZ();
+	}
+
+	@read
+	public float getPositionY() {
+		return coordinates.getPositionY();
+	}
+
+	@read
+	public float getPreviousPositionX() {
+		return coordinates.getPreviousPositionX();
+	}
+
+	@read
+	public float getPreviousPositionZ() {
+		return coordinates.getPreviousPositionZ();
+	}
+
+	@read
+	public float getPreviousPositionY() {
+		return coordinates.getPreviousPositionY();
+	}
+
+	@local
+	@dereferenced
+	@read
+	public Vector3 getPreviousPosition() {
+		return coordinates.getPreviousPosition();
+	}
+
+	@local
+	@dereferenced
+	@read
+	public Vector3 getPosition() {
+		return coordinates.getPosition();
+	}
+
+	public void setPosition(float x, float z, float y) {
+		coordinates.setPosition(x, z, y);
+	}
+
+	@dirty
+	public void initializePosition(float x, float z, float y) {
+		coordinates.initializePosition(x, z, y);
+	}
+
+	@nativeStub
+	@dirty
+	public native abstract int compareTo(OctTreeEntry obj);
+
+	@dirty
+	public abstract int registerToCloseObjectsReceivers() {
+	    return receiverFlags;
+	}
+
+	@read
+	public abstract int getReceiverFlags() {
+	    return receiverFlags;
+	}
+
+	@read
+	public boolean isInOctTree() {
+		return node;
+	}
+
+	/*@read
+	public int inRangeObjectCount() {
+		return closeobjects.size();
+	}*/
+
+	@reference
+	@read
+	@local
+	public OctTreeNode getNode() {
+		return node;
+	}
+
+	@local
+	public void setCloseObjects(CloseObjectsVector vec) {
+		closeobjects = vec;
+	}
+
+	@nativeStub
+	@dirty
+	public abstract native unsigned long getDirtyObjectID();
+
+	@dirty
+	@nativeStub
+	@virtualStub
+	public abstract native unsigned long getObjectID();
+
+	@read
+	public float getRadius() {
+		return radius;
+	}
+
+	@read
+	public boolean isBounding() {
+		return bounding;
+	}
+
+	@local
+	public native void setNode(OctTreeNode n);
+
+	public void setBounding() {
+		bounding = true;
+	}
+
+	public void setRadius(float rad) {
+		radius = rad;
+	}
+
+	@local
+	public void setDimensions(float value, float valueX, int type) {
+		if (type == 2 || type == 3) {
+			radius  = value;
+			radiusX = valueX;
+		}
+		else {
+			radius = value;
+		}
+		
+		areaType = type;
+	}
+
+	public void clearBounding() {
+		bounding = false;
+	}
+
+	@dirty
+	public abstract void setParent(OctTreeEntry par) {
+		parent = par;
+	}
+}

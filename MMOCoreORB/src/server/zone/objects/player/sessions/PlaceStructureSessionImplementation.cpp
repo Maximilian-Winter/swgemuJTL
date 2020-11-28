@@ -94,7 +94,7 @@ void PlaceStructureSessionImplementation::placeTemporaryNoBuildZone(const Shared
 	// Guild halls are approximately 55 m long, 64 m radius will surely cover that in all directions.
 	// Even if the placement coordinate aren't in the center of the building.
 	areaShape->setRadius(64);
-	areaShape->setAreaCenter(positionX, positionY);
+	areaShape->setAreaCenter(positionX, positionY, thisZone->getHeight(positionX,positionY));
 
 	ManagedReference<ActiveArea*> noBuildZone = (thisZone->getZoneServer()->createObject(STRING_HASHCODE("object/active_area.iff"), 0)).castTo<ActiveArea*>();
 

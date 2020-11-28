@@ -285,7 +285,7 @@ Vector<WorldCoordinates>* PathFinderManager::findPathFromWorldToWorld(const Worl
 
 		Vector3 mid = startTemp + ((targetTemp-startTemp) * 0.5f);
 
-		zone->getInRangeNavMeshes(mid.getX(), mid.getY(), &areas, true);
+		zone->getInRangeNavMeshes(mid.getX(), mid.getY(), mid.getZ(), &areas, true);
 
 		SortedVector<NavCollision*> collisions;
 		getNavMeshCollisions(&collisions, &areas, pointA.getWorldPosition(), pointB.getWorldPosition());
@@ -1062,7 +1062,7 @@ bool PathFinderManager::getSpawnPointInArea(const Sphere& area, Zone *zone, Vect
 	if (zone == nullptr)
 		return false;
 
-	zone->getInRangeNavMeshes(center.getX(), center.getY(), &areas, true);
+	zone->getInRangeNavMeshes(center.getX(), center.getY(), center.getZ(), &areas, true);
 
 	if (areas.size() == 0) {
 		Vector3 temp((frand() * 2.0f) - 1.0f, (frand() * 2.0f) - 1.0f, 0);

@@ -6,7 +6,7 @@ package server.zone.objects.scene;
 
 import engine.log.Logger;
 import engine.util.u3d.Coordinate;
-include server.zone.QuadTreeEntry;
+include server.zone.OctTreeEntry;
 import system.util.Vector;
 import system.util.VectorMap;
 import engine.util.u3d.Quaternion;
@@ -60,7 +60,7 @@ include engine.util.JSONSerializationType;
 
 @mock
 @json
-class SceneObject extends QuadTreeEntry implements Logger, Metrics {
+class SceneObject extends OctTreeEntry implements Logger, Metrics {
 	protected transient ZoneProcessServer server;
 
 	protected transient ZoneComponent zoneComponent;
@@ -626,12 +626,12 @@ class SceneObject extends QuadTreeEntry implements Logger, Metrics {
 	public native void updateDirection(float angleHeadingRadians);
 
 	@local
-	public void notifyInsert(QuadTreeEntry entry) {
+	public void notifyInsert(OctTreeEntry entry) {
 		zoneComponent.notifyInsert(this, entry);
 	}
 
 	@local
-	public void notifyDissapear(QuadTreeEntry entry) {
+	public void notifyDissapear(OctTreeEntry entry) {
 		zoneComponent.notifyDissapear(this, entry);
 	}
 
@@ -1276,7 +1276,7 @@ class SceneObject extends QuadTreeEntry implements Logger, Metrics {
 	public native abstract void notifySelfPositionUpdate();
 
 	@dirty
-	public native void notifyPositionUpdate(QuadTreeEntry entry);
+	public native void notifyPositionUpdate(OctTreeEntry entry);
 
 	/**
 	 * @param player player that closed the container
@@ -1293,10 +1293,10 @@ class SceneObject extends QuadTreeEntry implements Logger, Metrics {
 	public native SceneObject getParent();
 
 	@dirty
-	public native void setParent(QuadTreeEntry entry);
+	public native void setParent(OctTreeEntry entry);
 
 	@dirty
-	public native void setParent(QuadTreeEntry entry, boolean updateRecursively);
+	public native void setParent(OctTreeEntry entry, boolean updateRecursively);
 
 	@read
 	public ZoneServer getZoneServer() {

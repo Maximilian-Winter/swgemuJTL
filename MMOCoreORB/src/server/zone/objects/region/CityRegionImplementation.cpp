@@ -117,7 +117,7 @@ void CityRegionImplementation::updateNavmesh(const AABB& bounds, const String& q
 	}
 }
 
-Region* CityRegionImplementation::addRegion(float x, float y, float radius, bool persistent) {
+Region* CityRegionImplementation::addRegion(float x, float y, float z, float radius, bool persistent) {
 	if (zone == nullptr) {
 		return nullptr;
 	}
@@ -134,7 +134,7 @@ Region* CityRegionImplementation::addRegion(float x, float y, float radius, bool
 	ManagedReference<Region*> region = cast<Region*>(obj.get());
 	region->setCityRegion(_this.getReferenceUnsafeStaticCast());
 	region->setRadius(radius);
-	region->initializePosition(x, 0, y);
+	region->initializePosition(x, z, y);
 	region->setObjectName(regionName, false);
 
 	if (isClientRegion())
@@ -587,7 +587,7 @@ void CityRegionImplementation::setRadius(float rad) {
 
 	ManagedReference<Region*> oldRegion = regions.get(0).get();
 
-	ManagedReference<Region*> newRegion = addRegion(oldRegion->getPositionX(), oldRegion->getPositionY(), rad, true);
+	ManagedReference<Region*> newRegion = addRegion(oldRegion->getPositionX(), oldRegion->getPositionY(), oldRegion->getPositionZ(), rad, true);
 
 	Locker locker(oldRegion, _this.getReferenceUnsafeStaticCast());
 
