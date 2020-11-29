@@ -51,7 +51,7 @@ public:
 			creature->error("Error retrieving ship");
 			return GENERALERROR;
 		}
-		creature->switchZone("space_tatooine", 2300, -5900, 1900);
+		creature->switchZone("space_tatooine", 2300, 1900, -5900);
 		pcd->generateObject(creature);
 		
 		return SUCCESS;

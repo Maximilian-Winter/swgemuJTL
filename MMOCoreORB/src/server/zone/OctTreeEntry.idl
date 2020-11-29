@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2007 <SWGEmu>. All rights reserved.
+Copyright (C) 2020 <SWGEmu>. All rights reserved.
 Distribution of this file for usage outside of Core3 is prohibited.
 */
 
@@ -43,7 +43,6 @@ class OctTreeEntry extends Observable {
 
 	@dirty
 	public void addInRangeObject(OctTreeEntry obj, boolean doNotifyUpdate = true) {
-		//System::out << "adding in range object:" << obj << "\n";
 
 		if (closeobjects.put(obj) != -1) {
 			notifyInsert(obj);
@@ -52,50 +51,23 @@ class OctTreeEntry extends Observable {
 		}
 	}
 
-	/*@read
-	public OctTreeEntry getInRangeObject(int index) {
-		return closeobjects.get(index);
-	}*/
-
 	@dirty
 	public void removeInRangeObject(OctTreeEntry obj, boolean notifyDisappear = true) {
-		//System::out << "droping in range object:" << obj << "\n";
-
 		if (closeobjects.drop(obj) && notifyDisappear) {
 			notifyDissapear(obj);
 		}
-
-		/*else {
-			OctTreeEntry* obj2 = NULL;
-			obj2->getPositionX();
-
-			System::out << hex << "[0x" << obj->objectID << "] was not found in close objects for [0x"
-				 << objectID << dec << "]\n";
-		}*/
 	}
 
 	@dirty
 	public void removeInRangeObject(int index) {
-		//System::out << "droping in range object with index:" << index << "\n";
 
 		closeobjects.remove(index);
 	}
 
 	@dirty
 	public void removeInRangeObjects() {
-		//System::out << "droping  all in range objects\n";
-
-		/*for (int i = 0; i < closeobjects.size(); ++i) {
-			closeobjects.get(i).notifyRemovedFromCloseObjects();
-		}*/
-
 		closeobjects.removeAll();
 	}
-
-	/*@read
-	public boolean containsInRangeObject(OctTreeEntry obj) {
-		return closeobjects.contains(obj);
-	}*/
 
 	@dirty
 	public abstract boolean isInRange(OctTreeEntry obj, float range) {
@@ -299,11 +271,6 @@ class OctTreeEntry extends Observable {
 	public boolean isInOctTree() {
 		return node;
 	}
-
-	/*@read
-	public int inRangeObjectCount() {
-		return closeobjects.size();
-	}*/
 
 	@reference
 	@read

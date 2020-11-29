@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2007 <SWGEmu>. All rights reserved.
+Copyright (C) 2020 <SWGEmu>. All rights reserved.
 Distribution of this file for usage outside of Core3 is prohibited.
 */
 
@@ -12,11 +12,7 @@ OctTreeEntryImplementation::OctTreeEntryImplementation(OctTreeNode* n) {
 	node = n;
 	bounding = false;
 
-	//visibilityRange = 128;
-
 	closeobjects = nullptr;
-
-	//closeobjects.setInsertPlan(SortedVector<OctTreeEntry*>::NO_DUPLICATE);
 
 	radius = 0.5f;
 

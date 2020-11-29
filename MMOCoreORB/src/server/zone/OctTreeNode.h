@@ -67,7 +67,7 @@ public:
 
 	void removeObject(int index);
 
-	// Approximative test if a circle with center in x,y and
+	// Approximative test if a sphere with center in x,y,z and
 	// given radius crosses this node.
 	bool testInRange(float x, float y, float z, float range) const;
 

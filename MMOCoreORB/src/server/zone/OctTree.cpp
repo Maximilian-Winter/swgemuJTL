@@ -32,7 +32,6 @@ OctTreeNode::OctTreeNode(float minx, float miny, float minz, float maxx, float m
 	objects.setNoDuplicateInsertPlan();
 
 	parentNode = parent;
-//	nwNode = neNode = swNode = seNode = nullptr;
 
 	minX = minx;
 	minY = miny;
@@ -138,8 +137,6 @@ void OctTreeNode::check () {
 
 		if (OctTree::doLog())
 			System::out << "deleteing node (" << this << ")\n";
-
-		//delete this;
 	}
 }
 
@@ -153,7 +150,6 @@ String OctTreeNode::toStringData() const {
 	return s.toString();
 }
 
-//---------------------------------------------------------------------------//
 
 bool OctTree::logTree = false;
 
@@ -186,11 +182,6 @@ void OctTree::setSize(float minx, float miny, float minz, float maxx, float maxy
 }
 
 void OctTree::insert(OctTreeEntry *obj) {
-	/*if (!isLocked()) {
-		System::out << "inserting to unlocked quad tree\n";
-		StackTrace::printStackTrace();
-		raise(SIGSEGV);
-	}*/
 
 	E3_ASSERT(obj->getParent() == nullptr);
 
@@ -216,7 +207,6 @@ void OctTree::insert(OctTreeEntry *obj) {
 }
 
 bool OctTree::update(OctTreeEntry *obj) {
-	//assert(obj->getParent() == nullptr);
 
 	Locker locker(&mutex);
 
@@ -251,13 +241,6 @@ bool OctTree::update(OctTreeEntry *obj) {
 }
 
 void OctTree::inRange(OctTreeEntry *obj, float range) {
-	/*if (!isLocked()) {
-		System::out << "inRange unlocked quad tree\n";
-		StackTrace::printStackTrace();
-		raise(SIGSEGV);
-	}*/
-
-	//assert(obj->getParent() == nullptr);
 
 	ReadLocker locker(&mutex);
 
@@ -306,19 +289,14 @@ void OctTree::inRange(OctTreeEntry *obj, float range) {
 			}
 		}
 
+		_inRange(root, obj, range);
 
-		//	try {
-			_inRange(root, obj, range);
+		if (OctTree::doLog()) {
+			System::out << hex << "object [" << obj->getObjectID() <<  "] in range (";
 
-			if (OctTree::doLog()) {
-				System::out << hex << "object [" << obj->getObjectID() <<  "] in range (";
 
-				/*for (int i = 0; i < obj->inRangeObjectCount(); ++i) {
-				System::out << hex << obj->getInRangeObject(i)->getObjectID() << ", ";
-			}*/
-
-				System::out << "\n";
-			}
+			System::out << "\n";
+		}
 
 	} catch (Exception& e) {
 		System::out << "[OctTree] " << e.getMessage() << "\n";
@@ -354,12 +332,6 @@ int OctTree::inRange(float x, float y, float z, float range,
 }
 
 void OctTree::remove(OctTreeEntry *obj) {
-	/*if (!isLocked()) {
-		System::out << "remove on unlocked quad tree\n";
-		StackTrace::printStackTrace();
-		raise(SIGSEGV);
-	}*/
-
 	Locker locker(&mutex);
 
 	if (OctTree::doLog())
@@ -395,64 +367,23 @@ void OctTree::removeAll() {
 	}
 }
 
-/*
- * Every Node can have data and children. Every data must be completely
- * contained inside the Node, so boundary sphere is checked.
- */
 void OctTree::_insert(const Reference<OctTreeNode*>& node, OctTreeEntry *obj) {
-	/*
-	 * Logic:
-	 *
-	 * 1) We have Objects in this Node. The Node has no children.
-	 *    - Squaring was not yet needed, so we do it now and move
-	 *      all the objects down into the squares that arent locked.
-	 *
-	 * 2) We have Objects in this Node. The Node has children.
-	 *    - All those objects must be locked, else they would have been
-	 *    moved down on squaring. So we dont worry about moving them.
-	 *
-	 * 3) The Node is empty. We add the object.
-	 */
-
-	// Initially assume the object is not crossing any boundaries
+	
 	obj->clearBounding();
 
 	if (!node->isEmpty() && !node->hasSubNodes()) {
-		/*
-		 * We want to Insert another object, so we square this Node up and move
-		 * all the Objects that arent locked (cause they cross a boundary) down.
-		 */
 		if ((node->maxX - node->minX <= 8) && (node->maxY - node->minY <= 8) && (node->maxZ - node->minZ <= 8)) {
-			/*
-			 * This protects from killing the stack. If something is messed up it may
-			 * blow the stack because the recursion runs forever. Stop squaring when
-			 * it doesnt make sense anymore. If the two objects have the same coordinate
-			 * we add the new one to the map. The search is linear for objects inside
-			 * .1 Unit. So what.
-			 */
 			node->addObject(obj);
 			return;
 		}
 
-		/**
-		 * Proceed objects in node in reverse direction since this
-		 * makes handling deletions from the vector easier.
-		 */
 		for (int i = node->objects.size() - 1; i >= 0; i--) {
 			OctTreeEntry* existing = node->getObject(i);
 
-			// We remove the Object from the Node if its not locked
-			// for crossing boundaries to add it to another Node
 			if (existing->isBounding())
 				continue;
 
-			// Increment the refcount on the Object since if this is the
-			// last reference ever, the object will be destroyed by Delete()
-			//existing->IncRef ();
 			node->removeObject(i);
-
-			// First find out which square it needs, then Insert it into it
-			// We divide the Node area into 4 squares, reusing existing children
 
 			if (existing->isInBottomSWArea(node)) 
             {
@@ -512,17 +443,8 @@ void OctTree::_insert(const Reference<OctTreeNode*>& node, OctTreeEntry *obj) {
 
 				_insert(node->topNeNode, existing);
 			}
-
-			// Okay, we don't need this reference anymore
-			//existing->DecRef ();
 		}
 	}
-
-	/*
-	 * Maybe we squared, maybe we didnt. Anyway, this object extends beyond one
-	 * of the boundaries, so we cannot put it into a lower node. It will be
-	 * placed in this one regardless and locked.
-	 */
 
 	if (obj->isInBottomArea(node) || obj->isInTopArea(node)) {
 		obj->setBounding();
@@ -531,11 +453,6 @@ void OctTree::_insert(const Reference<OctTreeNode*>& node, OctTreeEntry *obj) {
 		return;
 	}
 
-	/*
-	 * The Node has been squared because there was already an object inside.
-	 * Also, the new object is contained in one of those new squares.
-	 * So we search for the right one and insert the object there.
-	 */
 	if (node->hasSubNodes()) {
 		if (obj->isInBottomSWArea(node)) 
         {
@@ -598,34 +515,20 @@ void OctTree::_insert(const Reference<OctTreeNode*>& node, OctTreeEntry *obj) {
 		return;
 	}
 
-	// Node is not squared, and we have only one data entry, so it can stay
-	// this way. Data can be Inserted, and the recursion is over.
 	node->addObject(obj);
 }
 
-/* The difference to the Insert is that it starts at the current node
- * and tries to find the right place to be now that the position changed.
- */
 bool OctTree::_update(const Reference<OctTreeNode*>& node, OctTreeEntry *obj) {
-	// Whew, still in the same square. Lucky bastards we are.
-	//System::out << "(" << obj->positionX << "," << obj->positionY << ")\n";
 
 	if (node->testInside(obj))
 		return true;
 
-	// Since we'll have to temporarily remove the object from the Quad Tree,
-	// make sure it won't be deleted as we do that
-	//data->IncRef ();
-
-	// Go upwards til the object is inside the square.
 	Reference<OctTreeNode*> cur = node->parentNode.get();
 	while (cur != nullptr && !cur->testInside(obj))
 		cur = cur->parentNode.get();
 
 	remove(obj);
 
-	// Here is the right spot for the object, so lets drop it in.
-	// May result in another squaring frenzy.
 	if (cur != nullptr) {
 		_insert(cur, obj);
 	}
@@ -634,9 +537,6 @@ bool OctTree::_update(const Reference<OctTreeNode*>& node, OctTreeEntry *obj) {
 		System::out << "[OctTree] error on update() - invalid Node\n";
 #endif
 
-	// We don't need the reference anymore. If the object goes out of the
-	// OctTree and there aren't any references left... well... goodbye
-	//data->DecRef ();
 	return cur != nullptr;
 }
 
@@ -707,9 +607,7 @@ void OctTree::safeInRange(OctTreeEntry* obj, float range) {
 }
 
 void OctTree::copyObjects(const Reference<OctTreeNode*>& node, float x, float y, float z, float range, SortedVector<ManagedReference<server::zone::OctTreeEntry*> >& objects) {
-	//	ReadLocker locker(&mutex);
 
-	//objects.addAll(node->objects);
 	for (int i = 0; i < node->objects.size(); ++i) {
 		objects.add(node->objects.getUnsafe(i).get());
 	}
@@ -735,9 +633,7 @@ void OctTree::copyObjects(const Reference<OctTreeNode*>& node, float x, float y,
 }
 
 void OctTree::copyObjects(const Reference<OctTreeNode*>& node, float x, float y, float z, float range, SortedVector<server::zone::OctTreeEntry*>& objects) {
-	//	ReadLocker locker(&mutex);
 
-	//objects.addAll(node->objects);
 
 	for (int i = 0; i < node->objects.size(); ++i) {
 		objects.add(node->objects.getUnsafe(i).get());
@@ -795,12 +691,9 @@ void OctTree::_inRange(const Reference<OctTreeNode*>& node, OctTreeEntry *obj, f
 
 				if (oCloseObjects != nullptr && !oCloseObjects->contains(obj)) {
 					o->addInRangeObject(obj);
-					//o->notifyInsert(obj);
 				} else
 					o->notifyPositionUpdate(obj);
 
-				/*obj->addInRangeObject(o, false);
-				o->addInRangeObject(obj);*/
 			} else {
 				float oldDeltaX = oldx - o->getPositionX();
 				float oldDeltaY = oldy - o->getPositionY();
