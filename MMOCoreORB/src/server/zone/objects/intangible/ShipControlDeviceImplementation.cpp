@@ -63,6 +63,8 @@ void ShipControlDeviceImplementation::storeObject(CreatureObject* player, bool f
 
 	transferObject(controlledObject, 4, true);
 	
+	player->switchZone("tatooine", 3534, 5, -4803, 0);
+
 	updateStatus(0);
 }
 

@@ -15,7 +15,7 @@
 #include "ShipUpdateTransformMessage.h"
 #include "server/zone/managers/collision/CollisionManager.h"
 #include "server/zone/packets/object/PlayClientEffectObjectMessage.h"
-
+#include "server/zone/objects/ship/ShipObject.h"
 #include "PackedVelocity.h"
 #include "PackedRotationRate.h"
 
@@ -110,7 +110,7 @@ public:
 		if (object->getZone() == nullptr)
 			return;
 
-		if (positionX > 8000.0f || positionX < -8000.0f || positionY > 8000.0f || positionY < -8000.0f|| positionZ > 8000.0f || positionZ < -8000.0f) {
+		if (positionX > 8000.0f || positionX < -8000.0f || positionY > 8000.0f || positionY < -8000.0f) {
 			/*
 			StringBuffer msg;
 			msg << "position out of bounds";

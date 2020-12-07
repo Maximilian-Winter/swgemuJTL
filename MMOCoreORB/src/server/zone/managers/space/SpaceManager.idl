@@ -38,5 +38,7 @@ class SpaceManager extends PlanetManager {
 
 	private native void loadLuaConfig();
 
+	private native void loadSpaceLuaConfig();
+
 	protected HyperspaceTravelPointList hyperspaceTravelPointList;
 }

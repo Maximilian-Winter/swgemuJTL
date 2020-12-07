@@ -10,6 +10,7 @@
 #include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/Zone.h"
 #include "server/zone/managers/player/PlayerManager.h"
+#include "server/zone/managers/ship/ShipManager.h"
 
 void ShipDeedImplementation::loadTemplateData(SharedObjectTemplate* templateData) {
 	DeedImplementation::loadTemplateData(templateData);
@@ -96,8 +97,8 @@ int ShipDeedImplementation::handleObjectMenuSelect(CreatureObject* player, byte 
 
 		Locker locker(shipControlDevice);
 
-		Reference<ShipObject*> ship = (server->getZoneServer()->createObject(generatedObjectTemplate.hashCode(), 1)).castTo<ShipObject*>();
-
+		//Reference<ShipObject*> ship = (server->getZoneServer()->createObject(generatedObjectTemplate.hashCode(), 1)).castTo<ShipObject*>();
+		ManagedReference<ShipObject*> ship = ShipManager::instance()->generateShip(generatedObjectTemplate);
 		if (ship == nullptr) {
 			shipControlDevice->destroyObjectFromDatabase(true);
 			player->sendSystemMessage("wrong ship object template " + generatedObjectTemplate);
@@ -105,10 +106,14 @@ int ShipDeedImplementation::handleObjectMenuSelect(CreatureObject* player, byte 
 		}
 		Locker vlocker(ship, player);
 		ship->createChildObjects();
+		ship->setChassisMaxHealth(1000.0f);
+		ship->setCurrentChassisHealth(900.0f);
 		ship->setMaxCondition(hitPoints);
 		ship->setConditionDamage(0);
+		ship->setOwner(player);
 		shipControlDevice->setControlledObject(ship);
 		shipControlDevice->transferObject(ship, 4);
+
 		if (datapad->transferObject(shipControlDevice, -1)) 
 		{
 			datapad->broadcastObject(shipControlDevice, true);

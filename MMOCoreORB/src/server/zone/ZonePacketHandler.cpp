@@ -93,6 +93,8 @@
 #include "packets/trade/GiveMoneyMessageCallback.h"
 #include "packets/trade/DenyTradeMessage.h"
 
+#include "packets/jtl/CreateProjectileMessage.h"
+#include "packets/jtl/CreateMissileMessage.h"
 #include "packets/ship/ShipUpdateTransformCallback.h"
 
 #include "packets/auction/IsVendorOwnerMessageCallback.h"
@@ -178,6 +180,8 @@ void ZonePacketHandler::registerMessages() {
 	messageCallbackFactory.registerObject<ChatBanFromRoomCallback>(0xD9FA0194);
 	messageCallbackFactory.registerObject<ChatUnbanFromRoomCallback>(0x4C8F94A9);
 	messageCallbackFactory.registerObject<ChatDeleteAllPersistentMessagesCallback>(0x8B1E8E72);
+	messageCallbackFactory.registerObject<CreateProjectileMessageCallback>(0xB88AF9A5);
+	messageCallbackFactory.registerObject<CreateMissileMessageCallback>(0x721CF08B);
 }
 
 void ZonePacketHandler::registerObjectControllerMessages() {

@@ -220,7 +220,7 @@ Core3 = {
 	LogJSON = 0, -- global log output in JSON format
 	LogSync = 0, -- flush global log file after each write
 
-	LuaLogJSON = 1,
+	LuaLogJSON = 0,
 	PathfinderLogJSON = 0,
 
 	TermsOfServiceVersion = 0,

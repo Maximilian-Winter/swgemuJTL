@@ -1823,7 +1823,11 @@ object_tangible_terminal_terminal_character_builder = object_tangible_terminal_s
 				"Resource Deed", "object/tangible/veteran_reward/resource.iff",
 				"Ship Deeds",
 				{
-					"YT1300", "object/tangible/ship/crafted/chassis/yt1300_deed.iff",
+					"Tie In", "object/tangible/ship/crafted/chassis/tie_in_deed.iff",
+					"Tie Light Duty", "object/tangible/ship/crafted/chassis/tie_light_duty_deed.iff",
+					"Tie Advanced", "object/tangible/ship/crafted/chassis/tieadvanced_deed.iff",
+					"Tie Aggresor", "object/tangible/ship/crafted/chassis/tieaggressor_deed.iff",
+					"Y-Wing Longprobe", "object/tangible/ship/crafted/chassis/ywing_longprobe_deed.iff",
 					"X-Wing", "object/tangible/ship/crafted/chassis/xwing_deed.iff",
 				},
 				"Vehicle Deeds",
@@ -2706,6 +2710,25 @@ object_tangible_terminal_terminal_character_builder = object_tangible_terminal_s
 			--"Webber", "object/tangible/scout/trap/trap_webber.iff"
 			--}
 			--}
+			"Ship Parts",
+			{
+				"Reactors",
+				{
+					"Reactor Incom Improved Mk.I", "object/tangible/ship/components/reactor/rct_incom_improved_mark1.iff"
+				},
+				"Engines",
+				{
+					"Engine Incom Fusialthrust II", "object/tangible/ship/components/engine/eng_incom_fusialthrust_2.iff"
+				},
+				"Capacitors",
+				{
+					"Capacitor Incom Improved Rebel Mk.I", "object/tangible/ship/components/weapon_capacitor/cap_incom_improved_rebel_mk1.iff"
+				},
+				"Weapons",
+				{
+					"Weapon Incom Advanced Blaster", "object/tangible/ship/components/weapon/wpn_incom_advanced_blaster.iff"
+				},
+			},
 			"Tools",
 			{
 				"Crafting Tools",
