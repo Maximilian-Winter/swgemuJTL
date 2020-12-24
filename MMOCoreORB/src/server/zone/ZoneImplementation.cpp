@@ -55,6 +55,7 @@ void ZoneImplementation::createContainerComponent() {
 void ZoneImplementation::initializePrivateData() {
 	if (zoneName.contains("space_")) {
 		planetManager = new SpaceManager(_this.getReferenceUnsafeStaticCast(), processor);
+		spaceZone = true;
 	} else {
 		planetManager = new PlanetManager(_this.getReferenceUnsafeStaticCast(), processor);
 	}

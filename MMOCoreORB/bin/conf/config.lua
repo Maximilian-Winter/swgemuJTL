@@ -140,7 +140,7 @@ Core3 = {
 
 
 	-- Where tre files are stored
-	TrePath = "/home/maximilianwinter/Desktop/SWGEmu",
+	TrePath = "/home/maximilian/SWGEmu/TreeFiles",
 
 	-- Each tre file (order is important!)
 	TreFiles = {

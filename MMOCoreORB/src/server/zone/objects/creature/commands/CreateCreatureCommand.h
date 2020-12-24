@@ -9,6 +9,8 @@
 #include "server/zone/Zone.h"
 #include "server/zone/managers/creature/CreatureManager.h"
 #include "server/zone/managers/creature/AiMap.h"
+#include "server/zone/objects/ship/ShipObject.h"
+#include "server/zone/managers/ship/ShipManager.h"
 
 class CreateCreatureCommand : public QueueCommand {
 public:
@@ -148,44 +150,55 @@ public:
 			creature->sendSystemMessage("Usage: /createCreature <template> [object template | ai template | baby | event [level] [scale] ] [X] [Z] [Y] [planet] [cellID]");
 			return GENERALERROR;
 		}
+		if(!zone->isSpaceZone())
+		{
+			CreatureManager* creatureManager = zone->getCreatureManager();
 
-		CreatureManager* creatureManager = zone->getCreatureManager();
+			uint32 templ = tempName.hashCode();
+			uint32 objTempl = objName.length() > 0 ? objName.hashCode() : 0;
 
-		uint32 templ = tempName.hashCode();
-		uint32 objTempl = objName.length() > 0 ? objName.hashCode() : 0;
+			AiAgent* npc = nullptr;
+			if (baby)
+				npc = cast<AiAgent*>(creatureManager->spawnCreatureAsBaby(templ, posX, posZ, posY, parID));
+			else if (event)
+				npc = cast<AiAgent*>(creatureManager->spawnCreatureAsEventMob(templ, level, posX, posZ, posY, parID));
+			else if (tempName.indexOf(".iff") != -1)
+				npc = cast<AiAgent*>(creatureManager->spawnCreatureWithAi(templ, posX, posZ, posY, parID));
+			else {
+				npc = cast<AiAgent*>(creatureManager->spawnCreature(templ, objTempl, posX, posZ, posY, parID));
+				if (npc != nullptr)
+					npc->activateLoad("");
+			}
 
-		AiAgent* npc = nullptr;
-		if (baby)
-			npc = cast<AiAgent*>(creatureManager->spawnCreatureAsBaby(templ, posX, posZ, posY, parID));
-		else if (event)
-			npc = cast<AiAgent*>(creatureManager->spawnCreatureAsEventMob(templ, level, posX, posZ, posY, parID));
-		else if (tempName.indexOf(".iff") != -1)
-			npc = cast<AiAgent*>(creatureManager->spawnCreatureWithAi(templ, posX, posZ, posY, parID));
-		else {
-			npc = cast<AiAgent*>(creatureManager->spawnCreature(templ, objTempl, posX, posZ, posY, parID));
-			if (npc != nullptr)
-				npc->activateLoad("");
+			if (baby && npc == nullptr) {
+				creature->sendSystemMessage("You cannot spawn " + tempName + " as a baby.");
+				return GENERALERROR;
+			} else if (npc == nullptr) {
+				creature->sendSystemMessage("could not spawn " + arguments.toString());
+				return GENERALERROR;
+			}
+
+			Locker clocker(npc, creature);
+
+			if (!aiTemplate.isEmpty()) {
+				npc->activateLoad(aiTemplate);
+			}
+
+			npc->updateDirection(Math::deg2rad(creature->getDirectionAngle()));
+
+			if (scale > 0 && scale != 1.0)
+				npc->setHeight(scale);
+
 		}
-
-		if (baby && npc == nullptr) {
-			creature->sendSystemMessage("You cannot spawn " + tempName + " as a baby.");
-			return GENERALERROR;
-		} else if (npc == nullptr) {
-			creature->sendSystemMessage("could not spawn " + arguments.toString());
-			return GENERALERROR;
+		else
+		{
+			ManagedReference<ShipObject*> ship = ShipManager::instance()->generateRebelNewbieShip();
+			Locker locker(ship);
+			ship->initializePosition(creature->getPositionX(), creature->getPositionY() + 10.0f, creature->getPositionZ());
+			zone->transferObject(ship, -1, true);
+			creature->sendSystemMessage("Test: " + tempName + " in Space");
 		}
-
-		Locker clocker(npc, creature);
-
-		if (!aiTemplate.isEmpty()) {
-			npc->activateLoad(aiTemplate);
-		}
-
-		npc->updateDirection(Math::deg2rad(creature->getDirectionAngle()));
-
-		if (scale > 0 && scale != 1.0)
-			npc->setHeight(scale);
-
+		
 		return SUCCESS;
 	}
 

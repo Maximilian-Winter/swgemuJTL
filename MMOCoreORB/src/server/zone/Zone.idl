@@ -163,6 +163,13 @@ class Zone extends SceneObject {
 	@preLocked
 	public native void dropSceneObject(SceneObject object);
 
+	protected boolean spaceZone;
+
+	@dirty
+	public boolean isSpaceZone() {
+	    return spaceZone;
+	}
+
 	@dirty
 	public PlanetManager getPlanetManager() {
 		return planetManager;

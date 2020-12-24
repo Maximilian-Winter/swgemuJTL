@@ -76,7 +76,7 @@ public:
 	}
     ShipObject* generateShip(String templateName);
     ShipObject* generateImperialNewbieShip(Reference<CreatureObject*> owner);
-    ShipObject* generateRebelNewbieShip(Reference<CreatureObject*> owner);
+    ShipObject* generateRebelNewbieShip();
     ShipObject* generateNeutralNewbieShip(Reference<CreatureObject*> owner);
 
 	class ShipProjectile : public Object {
