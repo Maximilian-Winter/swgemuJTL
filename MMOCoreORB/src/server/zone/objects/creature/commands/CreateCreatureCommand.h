@@ -11,6 +11,7 @@
 #include "server/zone/managers/creature/AiMap.h"
 #include "server/zone/objects/ship/ShipObject.h"
 #include "server/zone/managers/ship/ShipManager.h"
+#include "server/zone/objects/intangible/ShipControlDevice.h"
 
 class CreateCreatureCommand : public QueueCommand {
 public:
@@ -192,10 +193,12 @@ public:
 		}
 		else
 		{
-			ManagedReference<ShipObject*> ship = ShipManager::instance()->generateRebelNewbieShip();
+			ManagedReference<ShipObject*> ship = ShipManager::instance()->generateRebelNewbieShip(NULL);
 			Locker locker(ship);
-			ship->initializePosition(creature->getPositionX(), creature->getPositionY() + 10.0f, creature->getPositionZ());
-			zone->transferObject(ship, -1, true);
+			ship->initializePosition(posX, posZ, posY);
+			ship->setDirection(Quaternion(Vector3(0, 1, 0), 0));
+			creature->getZone()->transferObject(ship, -1, true);
+			creature->getZone()->update(ship);
 			creature->sendSystemMessage("Test: " + tempName + " in Space");
 		}
 		

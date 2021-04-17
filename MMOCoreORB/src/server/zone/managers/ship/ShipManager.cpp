@@ -597,13 +597,13 @@ ShipObject* ShipManager::generateImperialNewbieShip(Reference<CreatureObject*> o
 
     return ship;
 }
-ShipObject* ShipManager::generateRebelNewbieShip() {
+ShipObject* ShipManager::generateRebelNewbieShip(Reference<CreatureObject*> owner) {
     ManagedReference<ShipObject*> ship = generateShip("object/ship/awing.iff");
 	//ManagedReference<ShipObject*> ship = generateShip("object/ship/player/player_basic_z95.iff");
 	Locker locker(ship);
 	ship->setChassisMaxHealth(1000.0f);
 	ship->setCurrentChassisHealth(1000.0f);
-	//ship->setOwner(owner);
+	ship->setOwner(owner);
     return ship;
 }
 ShipObject* ShipManager::generateNeutralNewbieShip(Reference<CreatureObject*> owner) {

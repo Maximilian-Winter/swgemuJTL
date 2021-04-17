@@ -43,6 +43,7 @@
 
 object_ship_awing = object_ship_shared_awing:new {
 
+	objectName = "@space/ship_names:awing",
 	name = "awing",
 	slideFactor = 1.91,
 	chassisHitpoints = 300,

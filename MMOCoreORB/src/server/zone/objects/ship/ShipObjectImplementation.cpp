@@ -300,6 +300,31 @@ void ShipObjectImplementation::uninstall(CreatureObject* owner, int slot, bool n
     owner->sendMessage(message);
 }
 
+void ShipObjectImplementation::notifyObjectInsertedToZone(SceneObject* object)
+{
+
+	auto closeObjectsVector = getCloseObjects();
+	Vector<OctTreeEntry*> closeObjects(closeObjectsVector->size(), 10);
+	closeObjectsVector->safeCopyReceiversTo(closeObjects, CloseObjectsVector::CREOTYPE);
+
+	for (int i = 0; i < closeObjects.size(); ++i) 
+    {
+		SceneObject* obj = static_cast<SceneObject*>(closeObjects.get(i));
+
+		if ((obj->isCreatureObject() && isShipObject()) {
+			if (obj->getRootParent() != _this.getReferenceUnsafe()) {
+				if (object->getCloseObjects() != nullptr)
+					object->addInRangeObject(obj, false);
+				else
+					object->notifyInsert(obj);
+
+				if (obj->getCloseObjects() != nullptr)
+					obj->addInRangeObject(object, false);
+				else
+					obj->notifyInsert(object);
+			}
+		}
+	}
 
 int ShipObjectImplementation::notifyObjectInsertedToChild(SceneObject* object, SceneObject* child, SceneObject* oldParent) {
     ManagedReference<Zone*> zone = getZone();
@@ -319,7 +344,7 @@ int ShipObjectImplementation::notifyObjectInsertedToChild(SceneObject* object, S
             if ((oldParent == nullptr || !oldParent->isCellObject()) || oldParent == child) {
 
                 if (oldParent == nullptr || (oldParent != nullptr && dynamic_cast<Zone*>(oldParent) == nullptr && !oldParent->isCellObject())) {
-                    //notifyObjectInsertedToZone(object);
+                    notifyObjectInsertedToZone(object);
                     runInRange = false;
                 }
 
