@@ -5,6 +5,7 @@
 
 package server.zone.objects.ship;
 
+import server.zone.Zone;
 import server.zone.objects.tangible.TangibleObject;
 import server.zone.objects.ship.components.ShipComponent;
 include server.zone.objects.scene.SceneObject;
@@ -359,7 +360,9 @@ class ShipObject extends TangibleObject {
 
 	public native void sendTo(SceneObject player, boolean doClose, boolean forceLoadContainer = true);
 	public native void sendBaselinesTo(SceneObject player);
-    public native int notifyObjectInsertedToZone(SceneObject object);
+
+    public native void notifyInsertToZone(Zone zone);
+    public native void notifyObjectInsertedToZone(SceneObject object);
 
     public native int notifyObjectInsertedToChild(SceneObject object, SceneObject child, SceneObject oldParent);
     public native int notifyObjectRemovedFromChild(SceneObject object, SceneObject child);

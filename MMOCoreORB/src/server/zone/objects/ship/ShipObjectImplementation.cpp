@@ -300,6 +300,10 @@ void ShipObjectImplementation::uninstall(CreatureObject* owner, int slot, bool n
     owner->sendMessage(message);
 }
 
+void ShipObjectImplementation::notifyInsertToZone(Zone* zone) {
+    TangibleObjectImplementation::notifyInsertToZone(zone);
+}
+
 void ShipObjectImplementation::notifyObjectInsertedToZone(SceneObject* object)
 {
 
@@ -311,7 +315,7 @@ void ShipObjectImplementation::notifyObjectInsertedToZone(SceneObject* object)
     {
 		SceneObject* obj = static_cast<SceneObject*>(closeObjects.get(i));
 
-		if ((obj->isCreatureObject() && isShipObject()) {
+		if (obj->isCreatureObject() && isShipObject()) {
 			if (obj->getRootParent() != _this.getReferenceUnsafe()) {
 				if (object->getCloseObjects() != nullptr)
 					object->addInRangeObject(obj, false);
@@ -325,6 +329,7 @@ void ShipObjectImplementation::notifyObjectInsertedToZone(SceneObject* object)
 			}
 		}
 	}
+}
 
 int ShipObjectImplementation::notifyObjectInsertedToChild(SceneObject* object, SceneObject* child, SceneObject* oldParent) {
     ManagedReference<Zone*> zone = getZone();
