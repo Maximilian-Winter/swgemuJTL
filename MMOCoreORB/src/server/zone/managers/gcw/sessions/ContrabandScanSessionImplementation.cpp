@@ -42,6 +42,12 @@ int ContrabandScanSessionImplementation::initializeSession() {
 		contrabandScanTask->schedule(TASKDELAY);
 	}
 
+	if (scanner->getFaction() == Factions::FACTIONIMPERIAL || scanner->getFaction() == Factions::FACTIONREBEL) {
+		scannerFaction = scanner->getFaction();
+	} else {
+		scannerFaction = currentWinningFaction;
+	}
+
 	scanner->updateCooldownTimer("crackdown_scan", CONTRABANDSCANCOOLDOWN);
 
 	if (player->getActiveSession(SessionFacadeType::CONTRABANDSCAN) != nullptr) {
@@ -60,7 +66,19 @@ int ContrabandScanSessionImplementation::cancelSession() {
 	Locker crossLocker(scanner, player);
 
 	if (scanner != nullptr && enforcedScan && !scanner->isInCombat()) {
-		scanner->leash();
+		PatrolPoint* home = scanner->getHomeLocation();
+
+		if (home != nullptr) {
+			scanner->setFollowObject(nullptr);
+			scanner->setFollowState(AiAgent::PATROLLING);
+
+			scanner->setNextPosition(home->getPositionX(), home->getPositionZ(), home->getPositionY());
+			scanner->stopWaiting();
+
+			scanner->activateMovementEvent();
+		} else {
+			scanner->leash();
+		}
 	}
 
 	if (player != nullptr) {
@@ -101,6 +119,7 @@ void ContrabandScanSessionImplementation::runContrabandScan() {
 	}
 
 	timeLeft--;
+	int delay = TASKDELAY;
 
 	switch (scanState) {
 	case SCANCHANCE:
@@ -108,24 +127,30 @@ void ContrabandScanSessionImplementation::runContrabandScan() {
 		break;
 	case INITIATESCAN:
 		initiateScan(zone, scanner, player);
+		delay += 4000;
 		break;
 	case JEDIMINDTRICKPLAYERCHAT:
 		performJediMindTrick(zone, scanner, player);
+		delay += 4000;
 		break;
 	case JEDIMINDTRICKSCANNERTHINK:
 		reactOnJediMindTrick(zone, scanner, player);
+		delay += 2000;
 		break;
 	case JEDIMINDTRICKSCANNERCHAT:
 		jediMindTrickResult(zone, scanner, player);
+		delay += 2000;
 		break;
 	case JEDIDETECT:
 		jediDetect(zone, scanner, player);
 		break;
 	case FACTIONRANKCHECK:
 		checkPlayerFactionRank(zone, scanner, player);
+		delay += 4000;
 		break;
 	case SCANDELAY:
 		performScan(zone, scanner, player);
+		delay += 4000;
 		break;
 	case WAITFORPAYFINEANSWER:
 		waitForPayFineAnswer(zone, scanner, player);
@@ -138,7 +163,7 @@ void ContrabandScanSessionImplementation::runContrabandScan() {
 	}
 
 	if (scanState != FINISHED) {
-		contrabandScanTask->reschedule(TASKDELAY);
+		contrabandScanTask->reschedule(delay);
 	} else {
 		cancelSession();
 	}
@@ -146,7 +171,7 @@ void ContrabandScanSessionImplementation::runContrabandScan() {
 
 String ContrabandScanSessionImplementation::getFactionStringId(AiAgent* scanner, const String& imperial, const String& rebel) {
 	const String stringId = "@imperial_presence/contraband_search:";
-	if (scanner->getFaction() == Factions::FACTIONIMPERIAL || rebel == "") {
+	if (scannerFaction == Factions::FACTIONIMPERIAL || rebel == "") {
 		return stringId + imperial;
 	} else {
 		return stringId + rebel;
@@ -164,7 +189,7 @@ void ContrabandScanSessionImplementation::sendPersonalizedScannerChatMessage(
 	Zone* zone, AiAgent* scanner, CreatureObject* player, const String& imperial, const String& rebel = "") {
 	StringIdChatParameter chatMessage;
 	chatMessage.setStringId(getFactionStringId(scanner, imperial, rebel));
-	chatMessage.setTT(FactionManager::instance()->getRankName(player->getFactionRank()));
+	chatMessage.setTT("@faction_recruiter:" + FactionManager::instance()->getRankName(player->getFactionRank()));
 	chatMessage.setTO(player->getDisplayedName());
 	zone->getZoneServer()->getChatManager()->broadcastChatMessage(scanner, chatMessage, player->getObjectID(), 0, 0);
 }
@@ -182,7 +207,7 @@ bool ContrabandScanSessionImplementation::scanPrerequisitesMet(AiAgent* scanner,
 
 void ContrabandScanSessionImplementation::adjustReinforcementStrength(AiAgent* scanner) {
 	// If scanners faction is not winning, set reinforcement strength to 1, otherwise keep the strength provided from the GCW manager.
-	if (scanner->getFaction() != currentWinningFaction) {
+	if (scannerFaction != currentWinningFaction) {
 		currentWinningFactionDifficultyScaling = 1;
 	}
 }
@@ -237,7 +262,7 @@ void ContrabandScanSessionImplementation::sendContrabandFineSuiWindow(Zone* zone
 
 	suiContrabandFine->setPromptTitle("@imperial_presence/contraband_search:imp_fine_title");
 	String text = "@imperial_presence/contraband_search:imp_fine_text " + String::valueOf(fineToPay);
-	if (scanner->getFaction() == Factions::FACTIONIMPERIAL) {
+	if (scannerFaction == Factions::FACTIONIMPERIAL) {
 		text += " @imperial_presence/contraband_search:imp_fine_text2_imperial";
 	} else {
 		text += " @imperial_presence/contraband_search:imp_fine_text2_rebel";
@@ -275,6 +300,8 @@ void ContrabandScanSessionImplementation::performScan(Zone* zone, AiAgent* scann
 			} else {
 				sendSystemMessage(scanner, player, "probe_scan_negative");
 			}
+
+			scanner->setFollowObject(nullptr);
 			scanState = FINISHED;
 		}
 	}
@@ -306,7 +333,7 @@ void ContrabandScanSessionImplementation::initiateScan(Zone* zone, AiAgent* scan
 void ContrabandScanSessionImplementation::checkPlayerFactionRank(Zone* zone, AiAgent* scanner, CreatureObject* player) {
 	scanState = SCANDELAY;
 	unsigned int detectionChance = BASEFACTIONDETECTIONCHANCE + RANKDETECTIONCHANCEMODIFIER * player->getFactionRank();
-	if (scanner->getFaction() == player->getFaction()) {
+	if (scannerFaction == player->getFaction()) {
 		bool recognized = false;
 		if (player->getFactionStatus() == FactionStatus::OVERT) {
 			recognized = true;
@@ -425,7 +452,7 @@ void ContrabandScanSessionImplementation::addCrackdownTef(AiAgent* scanner, Crea
 	Reference<PlayerObject*> ghost = player->getPlayerObject();
 
 	if (ghost != nullptr) {
-		ghost->setCrackdownTefTowards(scanner->getFaction());
+		ghost->setCrackdownTefTowards(scannerFaction);
 	}
 }
 
@@ -453,22 +480,24 @@ void ContrabandScanSessionImplementation::jediMindTrickResult(Zone* zone, AiAgen
 }
 
 void ContrabandScanSessionImplementation::jediDetect(Zone* zone, AiAgent* scanner, CreatureObject* player) {
-	if (System::random(100) < jediAvoidDetectionSuccessChance(player) || (scanner->getFaction() == Factions::FACTIONREBEL && notDarkJedi(player))) {
-		scanState = FACTIONRANKCHECK;
-		timeLeft = SCANTIME;
-	} else {
-		sendScannerChatMessage(zone, scanner, player, "discovered_jedi_imperial", "discovered_jedi_rebel");
-		scanner->doAnimation("point_accusingly");
-		StringIdChatParameter chatMessage;
+	if (zone != nullptr) {
+		if (System::random(100) < jediAvoidDetectionSuccessChance(player) || (scannerFaction == Factions::FACTIONREBEL && notDarkJedi(player))) {
+			scanState = FACTIONRANKCHECK;
+			timeLeft = SCANTIME;
+		} else {
+			sendScannerChatMessage(zone, scanner, player, "discovered_jedi_imperial", "discovered_jedi_rebel");
+			scanner->doAnimation("point_accusingly");
+			StringIdChatParameter chatMessage;
 
-		String landingMessage = getFactionStringId(scanner, "containment_team_jedi_imperial", "containment_team_jedi_rebel");
-		callInLambdaShuttle(scanner, player, JEDIREINFORCEMENTDIFFICULTY, landingMessage);
+			String landingMessage = getFactionStringId(scanner, "containment_team_jedi_imperial", "containment_team_jedi_rebel");
+			callInLambdaShuttle(scanner, player, JEDIREINFORCEMENTDIFFICULTY, landingMessage);
 
-		addCrackdownTef(scanner, player);
-		enforcedScan = false;
-		CombatManager::instance()->startCombat(scanner, player);
+			addCrackdownTef(scanner, player);
+			enforcedScan = false;
+			CombatManager::instance()->startCombat(scanner, player);
 
-		scanState = FINISHED;
+			scanState = FINISHED;
+		}
 	}
 }
 
@@ -477,6 +506,7 @@ void ContrabandScanSessionImplementation::waitForPayFineAnswer(Zone* zone, AiAge
 		removeFineSuiWindow(player);
 		sendSystemMessage(scanner, player, "ran_away_imperial", "ran_away_rebel");
 		player->getPlayerObject()->decreaseFactionStanding(scanner->getFactionString(), zone->getGCWManager()->getCrackdownContrabandFineFactionPoints());
+		scanner->setFollowObject(nullptr);
 		scanState = FINISHED;
 	} else if (fineAnswerGiven) {
 		if (acceptedFine) {
@@ -505,6 +535,8 @@ void ContrabandScanSessionImplementation::waitForPayFineAnswer(Zone* zone, AiAge
 			scanner->doAnimation("wave_finger_warning");
 			player->getPlayerObject()->decreaseFactionStanding(scanner->getFactionString(), zone->getGCWManager()->getCrackdownContrabandFineFactionPoints());
 		}
+
+		scanner->setFollowObject(nullptr);
 		scanState = FINISHED;
 	}
 }
@@ -588,7 +620,7 @@ void ContrabandScanSessionImplementation::callInLambdaShuttle(AiAgent* scanner, 
 	}
 
 	if (spawnPoint != nullptr) {
-		Reference<Task*> lambdaTask = new LambdaShuttleWithReinforcementsTask(player, scanner->getFaction(), difficulty, landingMessage, *spawnPoint->getPosition(),
+		Reference<Task*> lambdaTask = new LambdaShuttleWithReinforcementsTask(player, scannerFaction, difficulty, landingMessage, *spawnPoint->getPosition(),
 																			  *spawnPoint->getDirection(), reinforcementType);
 		lambdaTask->schedule(IMMEDIATELY);
 	} else {

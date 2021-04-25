@@ -17,6 +17,7 @@ includeAiFile("templates/combatmovepet.lua")
 includeAiFile("templates/villageraider.lua")
 includeAiFile("templates/enclavesentinel.lua")
 includeAiFile("templates/deathwatchdefender.lua")
+includeAiFile("templates/citypatrol.lua")
 
 getTarget = {
 	{CREATURE_PET, "gettargetpetc"},
@@ -129,3 +130,16 @@ addAiBehavior("WaitDeathWatchDefender")
 addAiBehavior("SelectAttackDeathWatchDefender")
 addAiBehavior("SelectWeaponDeathWatchDefender")
 addAiBehavior("GetTargetDeathWatchDefender")
+
+addAiBehavior("CompositeCityPatrol")
+addAiBehavior("WalkCityPatrol")
+addAiBehavior("WaitCityPatrol")
+
+addAiBehavior("CompositeCombatPatrol")
+addAiBehavior("WalkCombatPatrol")
+addAiBehavior("WaitCombatPatrol")
+addAiBehavior("CombatMoveCombatPatrol")
+addAiBehavior("SelectAttackCombatPatrol")
+addAiBehavior("SelectWeaponCombatPatrol")
+addAiBehavior("GetTargetCombatPatrol")
+
